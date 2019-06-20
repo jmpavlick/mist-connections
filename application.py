@@ -1,11 +1,15 @@
-from flask import Flask, request
+from flask import Flask, request, render_template
 from flask_restful import Resource, Api
 import requests
 
 app = Flask(__name__)
 api = Api(app)
 
-class HelloWorld(Resource):
+@app.route('/', methods=['GET'])
+def home():
+    return render_template('index.html')
+
+class Forecast(Resource):
     def get(self):
         latitude = request.args.get('latitude')
         longtitude = request.args.get('longtitude')
@@ -13,7 +17,7 @@ class HelloWorld(Resource):
         response = requests.get(url = uri)
         return response.json()
 
-api.add_resource(HelloWorld, '/forecast')
+api.add_resource(Forecast, '/forecast')
 
 if __name__ == '__main__':
     app.run(debug=True)
