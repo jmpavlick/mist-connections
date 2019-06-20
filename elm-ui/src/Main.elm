@@ -1,19 +1,32 @@
-module Main exposing (Msg(..), main, update, view)
+module Main exposing (Model, Msg(..), initialModel, main, update, view)
 
 import Browser
+import Forecast exposing (..)
 import Html exposing (Html, button, div, text)
 import Html.Events exposing (onClick)
 
 
 main =
-    Browser.sandbox { init = 0, update = update, view = view }
+    Browser.sandbox { init = initialModel, update = update, view = view }
 
 
-type ForecastWindow
-    = Currently
-    | Minutely
-    | Hourly
-    | Daily
+
+-- TYPES
+
+
+initialModel : Model
+initialModel =
+    Model (Location 37 -122) 0
+
+
+type alias Model =
+    { location : Location
+    , demoModelField : Int
+    }
+
+
+
+-- MSG, UPDATE
 
 
 type Msg
@@ -24,15 +37,15 @@ type Msg
 update msg model =
     case msg of
         Increment ->
-            model + 1
+            { model | demoModelField = model.demoModelField + 1 }
 
         Decrement ->
-            model - 1
+            { model | demoModelField = model.demoModelField - 1 }
 
 
 view model =
     div []
         [ button [ onClick Decrement ] [ text "-" ]
-        , div [] [ text (String.fromInt model) ]
+        , div [] [ text (String.fromInt model.demoModelField) ]
         , button [ onClick Increment ] [ text "+" ]
         ]

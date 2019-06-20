@@ -4870,6 +4870,21 @@ function _Browser_load(url)
 		}
 	}));
 }
+var author$project$Forecast$Location = F2(
+	function (latitude, longitude) {
+		return {latitude: latitude, longitude: longitude};
+	});
+var author$project$Main$Model = F2(
+	function (location, demoModelField) {
+		return {demoModelField: demoModelField, location: location};
+	});
+var elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var author$project$Main$initialModel = A2(
+	author$project$Main$Model,
+	A2(author$project$Forecast$Location, 37, -122),
+	0);
 var elm$core$Basics$EQ = {$: 'EQ'};
 var elm$core$Basics$GT = {$: 'GT'};
 var elm$core$Basics$LT = {$: 'LT'};
@@ -4955,9 +4970,13 @@ var elm$core$Basics$sub = _Basics_sub;
 var author$project$Main$update = F2(
 	function (msg, model) {
 		if (msg.$ === 'Increment') {
-			return model + 1;
+			return _Utils_update(
+				model,
+				{demoModelField: model.demoModelField + 1});
 		} else {
-			return model - 1;
+			return _Utils_update(
+				model,
+				{demoModelField: model.demoModelField - 1});
 		}
 	});
 var author$project$Main$Decrement = {$: 'Decrement'};
@@ -5416,7 +5435,7 @@ var author$project$Main$view = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$text(
-						elm$core$String$fromInt(model))
+						elm$core$String$fromInt(model.demoModelField))
 					])),
 				A2(
 				elm$html$Html$button,
@@ -6348,9 +6367,6 @@ var elm$core$String$left = F2(
 		return (n < 1) ? '' : A3(elm$core$String$slice, 0, n, string);
 	});
 var elm$core$String$length = _String_length;
-var elm$core$Basics$negate = function (n) {
-	return -n;
-};
 var elm$core$String$right = F2(
 	function (n, string) {
 		return (n < 1) ? '' : A3(
@@ -9693,6 +9709,6 @@ var elm$browser$Browser$sandbox = function (impl) {
 		});
 };
 var author$project$Main$main = elm$browser$Browser$sandbox(
-	{init: 0, update: author$project$Main$update, view: author$project$Main$view});
+	{init: author$project$Main$initialModel, update: author$project$Main$update, view: author$project$Main$view});
 _Platform_export({'Main':{'init':author$project$Main$main(
 	elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.0"},"types":{"message":"Main.Msg","aliases":{},"unions":{"Main.Msg":{"args":[],"tags":{"Increment":[],"Decrement":[]}}}}})}});}(this));

@@ -2,7 +2,7 @@
 
 ps ax | grep Python | grep [m]ist-connections | awk '{ print $1 }' | xargs kill
 
-python3 ../mist-connections.py &
+python3 mist-connections.py &
 
 cd elm-ui
 
