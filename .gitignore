@@ -90,3 +90,7 @@ ENV/
 
 # Vim swap files
 *.sw*
+
+# Elm object files
+*.elmi
+*.elmo

@@ -9,6 +9,13 @@ main =
     Browser.sandbox { init = 0, update = update, view = view }
 
 
+type ForecastWindow
+    = Currently
+    | Minutely
+    | Hourly
+    | Daily
+
+
 type Msg
     = Increment
     | Decrement
