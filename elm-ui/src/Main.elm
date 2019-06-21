@@ -1,15 +1,12 @@
-module Main exposing (Model, Msg(..), initialModel, main, update, view)
+module Main exposing (Msg(..), main, update)
 
 import Browser
 import Forecast exposing (..)
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
 import Http exposing (..)
-import HumanDates exposing (..)
-import Round
+import Model exposing (..)
 import Task
 import Time exposing (Posix, Zone)
+import View exposing (..)
 
 
 main =
@@ -47,14 +44,6 @@ initialModel =
     }
 
 
-type alias Model =
-    { location : Location
-    , forecastSummary : Maybe ForecastSummary
-    , errorData : List Http.Error
-    , zone : Zone
-    }
-
-
 
 -- MSG, UPDATE
 
@@ -86,196 +75,6 @@ update msg model =
 
         Here here ->
             ( { model | zone = here }, Cmd.none )
-
-
-
--- VIEW
-
-
-weatherIconView : WeatherIcon -> Int -> Html Msg
-weatherIconView icon padding =
-    div [ style "display" "inline-block", "px-" ++ String.fromInt padding |> class ] [ i [ weatherIconAsClass icon |> class ] [] ]
-
-
-view : Model -> Html Msg
-view model =
-    div [ class "container-fluid" ] <|
-        case model.forecastSummary of
-            Nothing ->
-                [ div [ class "row" ] [ div [ class "col" ] [ h1 [] [ text "Mist Opportunities" ] ] ]
-                , div [ class "row" ] [ div [ class "col" ] [ h2 [] [ text "Loading..." ] ] ]
-                ]
-
-            Just summary ->
-                [ div [ class "row" ] [ div [ class "col" ] [ h1 [] [ text "Mist Opportunities" ] ] ]
-                , div [ class "row" ]
-                    [ div [ class "col" ]
-                        [ h2 []
-                            [ text "Currently: "
-                            , weatherIconView summary.currentForecastSummary.icon 0
-                            ]
-                        ]
-                    ]
-                , div [ class "row" ] [ div [ class "col" ] [ currentForecastSummaryView summary.currentForecastSummary ] ]
-                , div [ class "row" ] [ div [ class "col" ] [ hourlyForecastSummaryView summary.hourlyForecastSummary model.zone ] ]
-                , div [ class "row" ] [ div [ class "col" ] [ dailyForecastSummaryView summary.dailyForecastSummary model.zone ] ]
-                ]
-
-
-currentForecastSummaryView : CurrentForecastSummary -> Html Msg
-currentForecastSummaryView summary =
-    div [ class "container-fluid" ]
-        [ div [ class "row" ]
-            [ div [ class "col" ]
-                [ h3 []
-                    [ summary.summary
-                        ++ ". It's "
-                        ++ Round.round 0 summary.temperature
-                        ++ "º F outside."
-                        |> text
-                    ]
-                ]
-            ]
-        , div [ class "row" ]
-            [ div [ class "col" ]
-                [ h4 []
-                    [ let
-                        precipProbabilityFragment =
-                            case Round.round 0 summary.precipProbability of
-                                "0" ->
-                                    "Right now, "
-
-                                p ->
-                                    "Right now, there's a " ++ p ++ "% chance of precipitation, and "
-                      in
-                      precipProbabilityFragment
-                        ++ "the wind is blowing at "
-                        ++ Round.round 0 summary.windSpeed
-                        ++ " MPH."
-                        |> text
-                    ]
-                ]
-            ]
-        ]
-
-
-hourlyForecastSummaryView : HourlyForecastSummary -> Zone -> Html Msg
-hourlyForecastSummaryView summary zone =
-    let
-        next5hours =
-            List.take 5 summary.data
-    in
-    div [ class "container-fluid" ]
-        [ div [ class "row" ]
-            [ div [ class "col" ]
-                [ h4 [] [ text "Hourly:" ]
-                , h4 [] <|
-                    List.map (\x -> weatherIconView x.icon 1) next5hours
-                ]
-            ]
-        ]
-
-
-dailyForecastSummaryView : DailyForecastSummary -> Zone -> Html Msg
-dailyForecastSummaryView summary zone =
-    let
-        next5days =
-            List.take 5 summary.data
-
-        topRow =
-            div [ class "row" ]
-                [ div [ class "col" ]
-                    [ h4 [] [ text "Daily:" ]
-                    , h4 [] <|
-                        List.map (\x -> weatherIconView x.icon 1) next5days
-                    ]
-                ]
-    in
-    div [ class "container-fluid" ] <|
-        topRow
-            :: List.map (\x -> dailyForecastDetailSummaryView x zone) next5days
-
-
-hourlyForecastDetailSummaryView : HourlyForecastDetail -> Zone -> Html Msg
-hourlyForecastDetailSummaryView detail zone =
-    div [] []
-
-
-dailyForecastDetailSummaryView : DailyForecastDetail -> Zone -> Html Msg
-dailyForecastDetailSummaryView detail zone =
-    div [ class "row" ]
-        [ div [ class "col" ]
-            [ h5 []
-                [ HumanDates.prettyDay zone detail.time ++ ": " |> text
-                , weatherIconView detail.icon 0
-                ]
-            , p [] [ text detail.summary ]
-            , ul [ class "list-unstyled" ]
-                [ li [] [ "High: " ++ Round.round 0 detail.temperatureHigh ++ "º F at " ++ prettyHourMinute zone detail.temperatureHighTime |> text ]
-                , li [] [ "Low: " ++ Round.round 0 detail.temperatureLow ++ "º F at " ++ prettyHourMinute zone detail.temperatureLowTime |> text ]
-                ]
-            , ul [ class "list-unstyled" ]
-                [ li []
-                    [ case detail.precipProbability > 0 of
-                        False ->
-                            text "No precipitation today."
-
-                        True ->
-                            let
-                                accumulationClause =
-                                    case Round.round 3 detail.precipIntensity of
-                                        "0.000" ->
-                                            ""
-
-                                        somethingElse ->
-                                            ", with " ++ somethingElse ++ " inches of accumulation per hour"
-                            in
-                            Round.round 0 detail.precipProbability
-                                ++ "% chance of "
-                                ++ detail.precipType
-                                ++ accumulationClause
-                                ++ "."
-                                |> text
-                    ]
-                ]
-            , ul [ class "list-unstyled" ]
-                [ li []
-                    [ case detail.windSpeed > 0 of
-                        False ->
-                            text "No wind today."
-
-                        True ->
-                            let
-                                gustsClause =
-                                    case detail.windGust > 0 of
-                                        False ->
-                                            ""
-
-                                        True ->
-                                            ", with gusts of up to "
-                                                ++ Round.round 0 detail.windGust
-                                                ++ " MPH"
-                            in
-                            Round.round 0 detail.windSpeed
-                                ++ " MPH wind, coming from the "
-                                ++ String.toLower (bearingDirectionToString detail.windBearing)
-                                ++ gustsClause
-                                ++ "."
-                                |> text
-                    ]
-                ]
-            ]
-        ]
-
-
-hourlyForecastDetailDetailView : HourlyForecastDetail -> Zone -> Html Msg
-hourlyForecastDetailDetailView detail zone =
-    div [] []
-
-
-dailyForecastDetailDetailView : DailyForecastDetail -> Zone -> Html Msg
-dailyForecastDetailDetailView detail zone =
-    div [] []
 
 
 
