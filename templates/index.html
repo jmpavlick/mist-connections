@@ -13,15 +13,23 @@
   <main></main>
   <script>
     (function() {
-      navigator.geolocation.getCurrentPosition(function(position) {
+      function success(position) {
+        elm({ latitude: position.coords.latitude, longitude: position.coords.longitude });
+      };
+
+      function failure() {
+        alert("Unable to determine your location; showing you the weather for Cupertino, CA instead! Wherever you are, you'd probably rather be there, anyway.");
+        elm({ latitude: 37.33182, longitude: -122.03118 });
+      };
+
+      function elm(flags) {
         var app = Elm.Main.init({
           node: document.querySelector('main'),
-          flags: {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude 
-          }
+          flags: flags
         });
-      });
+      };
+
+      navigator.geolocation.getCurrentPosition(success, failure);
     })();
     // you can use ports and stuff here
   </script>
