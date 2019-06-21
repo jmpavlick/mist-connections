@@ -37,16 +37,14 @@ prettyHourMinute zone posix =
                     ( hourRaw - 12, "PM" )
 
                 False ->
-                    let
-                        h =
-                            case hourRaw of
-                                0 ->
-                                    12
+                    ( case hourRaw of
+                        0 ->
+                            12
 
-                                somethingElse ->
-                                    somethingElse
-                    in
-                    ( h, "AM" )
+                        somethingElse ->
+                            somethingElse
+                    , "AM"
+                    )
 
         minuteRaw =
             Time.toMinute zone posix
@@ -59,7 +57,7 @@ prettyHourMinute zone posix =
                 False ->
                     String.fromInt minuteRaw
     in
-    String.fromInt hour ++ ":" ++ minute
+    String.fromInt hour ++ ":" ++ minute ++ " " ++ meridiem
 
 
 weekdayToString : Weekday -> String

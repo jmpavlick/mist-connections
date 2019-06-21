@@ -5943,6 +5943,18 @@ var author$project$Forecast$bearingDirectionDecoder = function () {
 		},
 		elm$json$Json$Decode$int);
 }();
+var author$project$Forecast$floatAsPercentDecoder = A2(
+	elm$json$Json$Decode$andThen,
+	function (x) {
+		return elm$json$Json$Decode$succeed(x * 100);
+	},
+	elm$json$Json$Decode$float);
+var author$project$Forecast$millimetersAsInchesDecoder = A2(
+	elm$json$Json$Decode$andThen,
+	function (x) {
+		return elm$json$Json$Decode$succeed(x * 3.93701e-2);
+	},
+	elm$json$Json$Decode$float);
 var author$project$Forecast$dailyForecastDetailDecoder = A3(
 	NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 	'windBearing',
@@ -5979,12 +5991,12 @@ var author$project$Forecast$dailyForecastDetailDecoder = A3(
 								A4(
 									NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
 									'precipProbability',
-									elm$json$Json$Decode$float,
+									author$project$Forecast$floatAsPercentDecoder,
 									0,
 									A3(
 										NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 										'precipIntensity',
-										elm$json$Json$Decode$float,
+										author$project$Forecast$millimetersAsInchesDecoder,
 										A3(
 											NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 											'sunsetTime',
@@ -6047,11 +6059,11 @@ var author$project$Forecast$hourlyForecastDetailDecoder = A3(
 				A3(
 					NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 					'precipProbability',
-					elm$json$Json$Decode$float,
+					author$project$Forecast$floatAsPercentDecoder,
 					A3(
 						NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 						'precipIntensity',
-						elm$json$Json$Decode$float,
+						author$project$Forecast$millimetersAsInchesDecoder,
 						A3(
 							NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 							'icon',
@@ -7460,6 +7472,26 @@ var author$project$Main$currentForecastSummaryView = function (summary) {
 					]))
 			]));
 };
+var author$project$Forecast$bearingDirectionToString = function (b) {
+	switch (b.$) {
+		case 'North':
+			return 'North';
+		case 'Northeast':
+			return 'Northeast';
+		case 'East':
+			return 'East';
+		case 'Southeast':
+			return 'Southeast';
+		case 'South':
+			return 'South';
+		case 'Southwest':
+			return 'Southwest';
+		case 'West':
+			return 'West';
+		default:
+			return 'Northwest';
+	}
+};
 var author$project$HumanDates$monthToString = function (month) {
 	switch (month.$) {
 		case 'Jan':
@@ -7691,20 +7723,21 @@ var author$project$HumanDates$prettyHourMinute = F2(
 			if (_n1) {
 				return _Utils_Tuple2(hourRaw - 12, 'PM');
 			} else {
-				var h = function () {
-					if (!hourRaw) {
-						return 12;
-					} else {
-						var somethingElse = hourRaw;
-						return somethingElse;
-					}
-				}();
-				return _Utils_Tuple2(h, 'AM');
+				return _Utils_Tuple2(
+					function () {
+						if (!hourRaw) {
+							return 12;
+						} else {
+							var somethingElse = hourRaw;
+							return somethingElse;
+						}
+					}(),
+					'AM');
 			}
 		}();
 		var hour = _n0.a;
 		var meridiem = _n0.b;
-		return elm$core$String$fromInt(hour) + (':' + minute);
+		return elm$core$String$fromInt(hour) + (':' + (minute + (' ' + meridiem)));
 	});
 var author$project$Forecast$weatherIconAsClass = function (icon) {
 	return 'wi wi-' + function () {
@@ -7757,8 +7790,10 @@ var author$project$Main$weatherIconView = F2(
 					_List_Nil)
 				]));
 	});
+var elm$core$String$toLower = _String_toLower;
 var elm$html$Html$h5 = _VirtualDom_node('h5');
 var elm$html$Html$li = _VirtualDom_node('li');
+var elm$html$Html$p = _VirtualDom_node('p');
 var elm$html$Html$ul = _VirtualDom_node('ul');
 var author$project$Main$dailyForecastDetailSummaryView = F2(
 	function (detail, zone) {
@@ -7788,6 +7823,13 @@ var author$project$Main$dailyForecastDetailSummaryView = F2(
 									A2(author$project$Main$weatherIconView, detail.icon, 0)
 								])),
 							A2(
+							elm$html$Html$p,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text(detail.summary)
+								])),
+							A2(
 							elm$html$Html$ul,
 							_List_fromArray(
 								[
@@ -7810,6 +7852,72 @@ var author$project$Main$dailyForecastDetailSummaryView = F2(
 										[
 											elm$html$Html$text(
 											'Low: ' + (A2(myrho$elm_round$Round$round, 0, detail.temperatureLow) + ('º F at ' + A2(author$project$HumanDates$prettyHourMinute, zone, detail.temperatureLowTime))))
+										]))
+								])),
+							A2(
+							elm$html$Html$ul,
+							_List_fromArray(
+								[
+									elm$html$Html$Attributes$class('list-unstyled')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									elm$html$Html$li,
+									_List_Nil,
+									_List_fromArray(
+										[
+											function () {
+											var _n0 = detail.precipProbability > 0;
+											if (!_n0) {
+												return elm$html$Html$text('No precipitation today.');
+											} else {
+												var accumulationClause = function () {
+													var _n1 = A2(myrho$elm_round$Round$round, 3, detail.precipIntensity);
+													if (_n1 === '0.000') {
+														return '';
+													} else {
+														var somethingElse = _n1;
+														return ', with ' + (somethingElse + ' inches of accumulation per hour');
+													}
+												}();
+												return elm$html$Html$text(
+													A2(myrho$elm_round$Round$round, 0, detail.precipProbability) + ('% chance of ' + (detail.precipType + (accumulationClause + '.'))));
+											}
+										}()
+										]))
+								])),
+							A2(
+							elm$html$Html$ul,
+							_List_fromArray(
+								[
+									elm$html$Html$Attributes$class('list-unstyled')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									elm$html$Html$li,
+									_List_Nil,
+									_List_fromArray(
+										[
+											function () {
+											var _n2 = detail.windSpeed > 0;
+											if (!_n2) {
+												return elm$html$Html$text('No wind today.');
+											} else {
+												var gustsClause = function () {
+													var _n3 = detail.windGust > 0;
+													if (!_n3) {
+														return '';
+													} else {
+														return ', with gusts of up to ' + (A2(myrho$elm_round$Round$round, 0, detail.windGust) + ' MPH');
+													}
+												}();
+												return elm$html$Html$text(
+													A2(myrho$elm_round$Round$round, 0, detail.windSpeed) + (' MPH wind, coming from the ' + (elm$core$String$toLower(
+														author$project$Forecast$bearingDirectionToString(detail.windBearing)) + (gustsClause + '.'))));
+											}
+										}()
 										]))
 								]))
 						]))
@@ -8369,7 +8477,6 @@ var elm$browser$Debugger$Overlay$viewProblemType = function (_n0) {
 			]));
 };
 var elm$html$Html$a = _VirtualDom_node('a');
-var elm$html$Html$p = _VirtualDom_node('p');
 var elm$html$Html$Attributes$href = function (url) {
 	return A2(
 		elm$html$Html$Attributes$stringProperty,

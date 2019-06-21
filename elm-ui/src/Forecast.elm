@@ -278,8 +278,8 @@ dailyForecastDetailDecoder =
         |> required "icon" weatherIconDecoder
         |> required "sunriseTime" unixTimeDecoder
         |> required "sunsetTime" unixTimeDecoder
-        |> required "precipIntensity" float
-        |> optional "precipProbability" float 0
+        |> required "precipIntensity" millimetersAsInchesDecoder
+        |> optional "precipProbability" floatAsPercentDecoder 0
         |> optional "precipType" string ""
         |> required "temperatureHigh" float
         |> required "temperatureHighTime" unixTimeDecoder
@@ -296,8 +296,8 @@ hourlyForecastDetailDecoder =
         |> required "time" unixTimeDecoder
         |> required "summary" string
         |> required "icon" weatherIconDecoder
-        |> required "precipIntensity" float
-        |> required "precipProbability" float
+        |> required "precipIntensity" millimetersAsInchesDecoder
+        |> required "precipProbability" floatAsPercentDecoder
         |> required "temperature" float
         |> required "windSpeed" float
         |> required "windGust" float
@@ -352,3 +352,15 @@ weatherIconDecoder =
                         _ ->
                             Cloudy
             )
+
+
+floatAsPercentDecoder : Decoder Float
+floatAsPercentDecoder =
+    float
+        |> andThen (\x -> x * 100 |> Decode.succeed)
+
+
+millimetersAsInchesDecoder : Decoder Float
+millimetersAsInchesDecoder =
+    float
+        |> andThen (\x -> x * 0.0393701 |> Decode.succeed)

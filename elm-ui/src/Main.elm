@@ -209,9 +209,60 @@ dailyForecastDetailSummaryView detail zone =
                 [ HumanDates.prettyDay zone detail.time ++ ": " |> text
                 , weatherIconView detail.icon 0
                 ]
+            , p [] [ text detail.summary ]
             , ul [ class "list-unstyled" ]
                 [ li [] [ "High: " ++ Round.round 0 detail.temperatureHigh ++ "º F at " ++ prettyHourMinute zone detail.temperatureHighTime |> text ]
                 , li [] [ "Low: " ++ Round.round 0 detail.temperatureLow ++ "º F at " ++ prettyHourMinute zone detail.temperatureLowTime |> text ]
+                ]
+            , ul [ class "list-unstyled" ]
+                [ li []
+                    [ case detail.precipProbability > 0 of
+                        False ->
+                            text "No precipitation today."
+
+                        True ->
+                            let
+                                accumulationClause =
+                                    case Round.round 3 detail.precipIntensity of
+                                        "0.000" ->
+                                            ""
+
+                                        somethingElse ->
+                                            ", with " ++ somethingElse ++ " inches of accumulation per hour"
+                            in
+                            Round.round 0 detail.precipProbability
+                                ++ "% chance of "
+                                ++ detail.precipType
+                                ++ accumulationClause
+                                ++ "."
+                                |> text
+                    ]
+                ]
+            , ul [ class "list-unstyled" ]
+                [ li []
+                    [ case detail.windSpeed > 0 of
+                        False ->
+                            text "No wind today."
+
+                        True ->
+                            let
+                                gustsClause =
+                                    case detail.windGust > 0 of
+                                        False ->
+                                            ""
+
+                                        True ->
+                                            ", with gusts of up to "
+                                                ++ Round.round 0 detail.windGust
+                                                ++ " MPH"
+                            in
+                            Round.round 0 detail.windSpeed
+                                ++ " MPH wind, coming from the "
+                                ++ String.toLower (bearingDirectionToString detail.windBearing)
+                                ++ gustsClause
+                                ++ "."
+                                |> text
+                    ]
                 ]
             ]
         ]
