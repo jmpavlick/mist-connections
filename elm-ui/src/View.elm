@@ -52,7 +52,7 @@ currentForecastSummaryView summary =
                     [ summary.summary
                         ++ ". It's "
                         ++ Round.round 0 summary.temperature
-                        ++ "º F outside."
+                        ++ "º outside."
                         |> text
                     ]
                 ]
@@ -128,11 +128,21 @@ hourlyForecastDetailSummaryView detail zone =
                 [ HumanDates.prettyHourMinute zone detail.time
                     ++ ": "
                     ++ Round.round 0 detail.temperature
-                    ++ "º F, "
+                    ++ "º "
                     |> text
                 , weatherIconView detail.icon 0
                 ]
             , p [] [ detail.summary ++ "." |> text ]
+            , ul [ class "list-unstyled" ]
+                [ li []
+                    [ precipitationText detail.precipProbability detail.precipIntensity detail.precipType |> text
+                    ]
+                ]
+            , ul [ class "list-unstyled" ]
+                [ li []
+                    [ windSpeedText detail.windSpeed detail.windGust detail.windBearing |> text
+                    ]
+                ]
             ]
         ]
 
@@ -147,57 +157,17 @@ dailyForecastDetailSummaryView detail zone =
                 ]
             , p [] [ text detail.summary ]
             , ul [ class "list-unstyled" ]
-                [ li [] [ "High: " ++ Round.round 0 detail.temperatureHigh ++ "º F at " ++ prettyHourMinute zone detail.temperatureHighTime |> text ]
-                , li [] [ "Low: " ++ Round.round 0 detail.temperatureLow ++ "º F at " ++ prettyHourMinute zone detail.temperatureLowTime |> text ]
+                [ li [] [ "High: " ++ Round.round 0 detail.temperatureHigh ++ "º at " ++ prettyHourMinute zone detail.temperatureHighTime |> text ]
+                , li [] [ "Low: " ++ Round.round 0 detail.temperatureLow ++ "º at " ++ prettyHourMinute zone detail.temperatureLowTime |> text ]
                 ]
             , ul [ class "list-unstyled" ]
                 [ li []
-                    [ case detail.precipProbability > 0 of
-                        False ->
-                            text "No precipitation today."
-
-                        True ->
-                            let
-                                accumulationClause =
-                                    case Round.round 3 detail.precipIntensity of
-                                        "0.000" ->
-                                            ""
-
-                                        somethingElse ->
-                                            ", with " ++ somethingElse ++ " inches of accumulation per hour"
-                            in
-                            Round.round 0 detail.precipProbability
-                                ++ "% chance of "
-                                ++ detail.precipType
-                                ++ accumulationClause
-                                ++ "."
-                                |> text
+                    [ precipitationText detail.precipProbability detail.precipIntensity detail.precipType |> text
                     ]
                 ]
             , ul [ class "list-unstyled" ]
                 [ li []
-                    [ case detail.windSpeed > 0 of
-                        False ->
-                            text "No wind today."
-
-                        True ->
-                            let
-                                gustsClause =
-                                    case detail.windGust > 0 of
-                                        False ->
-                                            ""
-
-                                        True ->
-                                            ", with gusts of up to "
-                                                ++ Round.round 0 detail.windGust
-                                                ++ " MPH"
-                            in
-                            Round.round 0 detail.windSpeed
-                                ++ " MPH wind, coming from the "
-                                ++ String.toLower (bearingDirectionToString detail.windBearing)
-                                ++ gustsClause
-                                ++ "."
-                                |> text
+                    [ windSpeedText detail.windSpeed detail.windGust detail.windBearing |> text
                     ]
                 ]
             ]
@@ -212,3 +182,51 @@ hourlyForecastDetailDetailView detail zone =
 dailyForecastDetailDetailView : DailyForecastDetail -> Zone -> Html msg
 dailyForecastDetailDetailView detail zone =
     div [] []
+
+
+windSpeedText : Float -> Float -> BearingDirection -> String
+windSpeedText windSpeed windGust bearingDirection =
+    case windSpeed > 0 of
+        False ->
+            "No wind today."
+
+        True ->
+            let
+                gustsClause =
+                    case windGust > 0 of
+                        False ->
+                            ""
+
+                        True ->
+                            ", with gusts of up to "
+                                ++ Round.round 0 windGust
+                                ++ " MPH"
+            in
+            Round.round 0 windSpeed
+                ++ " MPH wind, coming from the "
+                ++ String.toLower (bearingDirectionToString bearingDirection)
+                ++ gustsClause
+                ++ "."
+
+
+precipitationText : Float -> Float -> String -> String
+precipitationText precipProbability precipIntensity precipType =
+    case precipProbability > 0 of
+        False ->
+            "No precipitation today."
+
+        True ->
+            let
+                accumulationClause =
+                    case Round.round 3 precipIntensity of
+                        "0.000" ->
+                            ""
+
+                        somethingElse ->
+                            ", with " ++ somethingElse ++ " inches of accumulation per hour"
+            in
+            Round.round 0 precipProbability
+                ++ "% chance of "
+                ++ precipType
+                ++ accumulationClause
+                ++ "."

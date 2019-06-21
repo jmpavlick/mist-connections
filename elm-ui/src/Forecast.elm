@@ -139,6 +139,7 @@ type alias HourlyForecastDetail =
     , icon : WeatherIcon
     , precipIntensity : Float
     , precipProbability : Float
+    , precipType : String
     , temperature : Float
     , windSpeed : Float
     , windGust : Float
@@ -280,7 +281,7 @@ dailyForecastDetailDecoder =
         |> required "sunsetTime" unixTimeDecoder
         |> required "precipIntensity" millimetersAsInchesDecoder
         |> optional "precipProbability" floatAsPercentDecoder 0
-        |> optional "precipType" string ""
+        |> optional "precipType" string "precipitation"
         |> required "temperatureHigh" float
         |> required "temperatureHighTime" unixTimeDecoder
         |> required "temperatureLow" float
@@ -298,6 +299,7 @@ hourlyForecastDetailDecoder =
         |> required "icon" weatherIconDecoder
         |> required "precipIntensity" millimetersAsInchesDecoder
         |> required "precipProbability" floatAsPercentDecoder
+        |> optional "precipType" string "precipitation"
         |> required "temperature" float
         |> required "windSpeed" float
         |> required "windGust" float

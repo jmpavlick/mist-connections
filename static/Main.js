@@ -5987,7 +5987,7 @@ var author$project$Forecast$dailyForecastDetailDecoder = A3(
 								NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
 								'precipType',
 								elm$json$Json$Decode$string,
-								'',
+								'precipitation',
 								A4(
 									NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
 									'precipProbability',
@@ -6036,10 +6036,27 @@ var author$project$Forecast$HourlyForecastSummary = F3(
 	function (summary, icon, data) {
 		return {data: data, icon: icon, summary: summary};
 	});
-var author$project$Forecast$HourlyForecastDetail = F9(
-	function (time, summary, icon, precipIntensity, precipProbability, temperature, windSpeed, windGust, windBearing) {
-		return {icon: icon, precipIntensity: precipIntensity, precipProbability: precipProbability, summary: summary, temperature: temperature, time: time, windBearing: windBearing, windGust: windGust, windSpeed: windSpeed};
-	});
+var author$project$Forecast$HourlyForecastDetail = function (time) {
+	return function (summary) {
+		return function (icon) {
+			return function (precipIntensity) {
+				return function (precipProbability) {
+					return function (precipType) {
+						return function (temperature) {
+							return function (windSpeed) {
+								return function (windGust) {
+									return function (windBearing) {
+										return {icon: icon, precipIntensity: precipIntensity, precipProbability: precipProbability, precipType: precipType, summary: summary, temperature: temperature, time: time, windBearing: windBearing, windGust: windGust, windSpeed: windSpeed};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
 var author$project$Forecast$hourlyForecastDetailDecoder = A3(
 	NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 	'windBearing',
@@ -6056,27 +6073,32 @@ var author$project$Forecast$hourlyForecastDetailDecoder = A3(
 				NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 				'temperature',
 				elm$json$Json$Decode$float,
-				A3(
-					NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-					'precipProbability',
-					author$project$Forecast$floatAsPercentDecoder,
+				A4(
+					NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+					'precipType',
+					elm$json$Json$Decode$string,
+					'precipitation',
 					A3(
 						NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-						'precipIntensity',
-						author$project$Forecast$millimetersAsInchesDecoder,
+						'precipProbability',
+						author$project$Forecast$floatAsPercentDecoder,
 						A3(
 							NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-							'icon',
-							author$project$Forecast$weatherIconDecoder,
+							'precipIntensity',
+							author$project$Forecast$millimetersAsInchesDecoder,
 							A3(
 								NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-								'summary',
-								elm$json$Json$Decode$string,
+								'icon',
+								author$project$Forecast$weatherIconDecoder,
 								A3(
 									NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-									'time',
-									author$project$Forecast$unixTimeDecoder,
-									elm$json$Json$Decode$succeed(author$project$Forecast$HourlyForecastDetail))))))))));
+									'summary',
+									elm$json$Json$Decode$string,
+									A3(
+										NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+										'time',
+										author$project$Forecast$unixTimeDecoder,
+										elm$json$Json$Decode$succeed(author$project$Forecast$HourlyForecastDetail)))))))))));
 var author$project$Forecast$hourlyForecastSummaryDecoder = A3(
 	NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 	'data',
@@ -7429,7 +7451,7 @@ var author$project$View$currentForecastSummaryView = function (summary) {
 								_List_fromArray(
 									[
 										elm$html$Html$text(
-										summary.summary + ('. It\'s ' + (A2(myrho$elm_round$Round$round, 0, summary.temperature) + 'º F outside.')))
+										summary.summary + ('. It\'s ' + (A2(myrho$elm_round$Round$round, 0, summary.temperature) + 'º outside.')))
 									]))
 							]))
 					])),
@@ -7471,26 +7493,6 @@ var author$project$View$currentForecastSummaryView = function (summary) {
 							]))
 					]))
 			]));
-};
-var author$project$Forecast$bearingDirectionToString = function (b) {
-	switch (b.$) {
-		case 'North':
-			return 'North';
-		case 'Northeast':
-			return 'Northeast';
-		case 'East':
-			return 'East';
-		case 'Southeast':
-			return 'Southeast';
-		case 'South':
-			return 'South';
-		case 'Southwest':
-			return 'Southwest';
-		case 'West':
-			return 'West';
-		default:
-			return 'Northwest';
-	}
 };
 var author$project$HumanDates$monthToString = function (month) {
 	switch (month.$) {
@@ -7739,6 +7741,24 @@ var author$project$HumanDates$prettyHourMinute = F2(
 		var meridiem = _n0.b;
 		return elm$core$String$fromInt(hour) + (':' + (minute + (' ' + meridiem)));
 	});
+var author$project$View$precipitationText = F3(
+	function (precipProbability, precipIntensity, precipType) {
+		var _n0 = precipProbability > 0;
+		if (!_n0) {
+			return 'No precipitation today.';
+		} else {
+			var accumulationClause = function () {
+				var _n1 = A2(myrho$elm_round$Round$round, 3, precipIntensity);
+				if (_n1 === '0.000') {
+					return '';
+				} else {
+					var somethingElse = _n1;
+					return ', with ' + (somethingElse + ' inches of accumulation per hour');
+				}
+			}();
+			return A2(myrho$elm_round$Round$round, 0, precipProbability) + ('% chance of ' + (precipType + (accumulationClause + '.')));
+		}
+	});
 var author$project$Forecast$weatherIconAsClass = function (icon) {
 	return 'wi wi-' + function () {
 		switch (icon.$) {
@@ -7787,7 +7807,45 @@ var author$project$View$weatherIconView = F2(
 					_List_Nil)
 				]));
 	});
+var author$project$Forecast$bearingDirectionToString = function (b) {
+	switch (b.$) {
+		case 'North':
+			return 'North';
+		case 'Northeast':
+			return 'Northeast';
+		case 'East':
+			return 'East';
+		case 'Southeast':
+			return 'Southeast';
+		case 'South':
+			return 'South';
+		case 'Southwest':
+			return 'Southwest';
+		case 'West':
+			return 'West';
+		default:
+			return 'Northwest';
+	}
+};
 var elm$core$String$toLower = _String_toLower;
+var author$project$View$windSpeedText = F3(
+	function (windSpeed, windGust, bearingDirection) {
+		var _n0 = windSpeed > 0;
+		if (!_n0) {
+			return 'No wind today.';
+		} else {
+			var gustsClause = function () {
+				var _n1 = windGust > 0;
+				if (!_n1) {
+					return '';
+				} else {
+					return ', with gusts of up to ' + (A2(myrho$elm_round$Round$round, 0, windGust) + ' MPH');
+				}
+			}();
+			return A2(myrho$elm_round$Round$round, 0, windSpeed) + (' MPH wind, coming from the ' + (elm$core$String$toLower(
+				author$project$Forecast$bearingDirectionToString(bearingDirection)) + (gustsClause + '.')));
+		}
+	});
 var elm$html$Html$h5 = _VirtualDom_node('h5');
 var elm$html$Html$li = _VirtualDom_node('li');
 var elm$html$Html$p = _VirtualDom_node('p');
@@ -7840,7 +7898,7 @@ var author$project$View$dailyForecastDetailSummaryView = F2(
 									_List_fromArray(
 										[
 											elm$html$Html$text(
-											'High: ' + (A2(myrho$elm_round$Round$round, 0, detail.temperatureHigh) + ('º F at ' + A2(author$project$HumanDates$prettyHourMinute, zone, detail.temperatureHighTime))))
+											'High: ' + (A2(myrho$elm_round$Round$round, 0, detail.temperatureHigh) + ('º at ' + A2(author$project$HumanDates$prettyHourMinute, zone, detail.temperatureHighTime))))
 										])),
 									A2(
 									elm$html$Html$li,
@@ -7848,7 +7906,7 @@ var author$project$View$dailyForecastDetailSummaryView = F2(
 									_List_fromArray(
 										[
 											elm$html$Html$text(
-											'Low: ' + (A2(myrho$elm_round$Round$round, 0, detail.temperatureLow) + ('º F at ' + A2(author$project$HumanDates$prettyHourMinute, zone, detail.temperatureLowTime))))
+											'Low: ' + (A2(myrho$elm_round$Round$round, 0, detail.temperatureLow) + ('º at ' + A2(author$project$HumanDates$prettyHourMinute, zone, detail.temperatureLowTime))))
 										]))
 								])),
 							A2(
@@ -7864,24 +7922,8 @@ var author$project$View$dailyForecastDetailSummaryView = F2(
 									_List_Nil,
 									_List_fromArray(
 										[
-											function () {
-											var _n0 = detail.precipProbability > 0;
-											if (!_n0) {
-												return elm$html$Html$text('No precipitation today.');
-											} else {
-												var accumulationClause = function () {
-													var _n1 = A2(myrho$elm_round$Round$round, 3, detail.precipIntensity);
-													if (_n1 === '0.000') {
-														return '';
-													} else {
-														var somethingElse = _n1;
-														return ', with ' + (somethingElse + ' inches of accumulation per hour');
-													}
-												}();
-												return elm$html$Html$text(
-													A2(myrho$elm_round$Round$round, 0, detail.precipProbability) + ('% chance of ' + (detail.precipType + (accumulationClause + '.'))));
-											}
-										}()
+											elm$html$Html$text(
+											A3(author$project$View$precipitationText, detail.precipProbability, detail.precipIntensity, detail.precipType))
 										]))
 								])),
 							A2(
@@ -7897,24 +7939,8 @@ var author$project$View$dailyForecastDetailSummaryView = F2(
 									_List_Nil,
 									_List_fromArray(
 										[
-											function () {
-											var _n2 = detail.windSpeed > 0;
-											if (!_n2) {
-												return elm$html$Html$text('No wind today.');
-											} else {
-												var gustsClause = function () {
-													var _n3 = detail.windGust > 0;
-													if (!_n3) {
-														return '';
-													} else {
-														return ', with gusts of up to ' + (A2(myrho$elm_round$Round$round, 0, detail.windGust) + ' MPH');
-													}
-												}();
-												return elm$html$Html$text(
-													A2(myrho$elm_round$Round$round, 0, detail.windSpeed) + (' MPH wind, coming from the ' + (elm$core$String$toLower(
-														author$project$Forecast$bearingDirectionToString(detail.windBearing)) + (gustsClause + '.'))));
-											}
-										}()
+											elm$html$Html$text(
+											A3(author$project$View$windSpeedText, detail.windSpeed, detail.windGust, detail.windBearing))
 										]))
 								]))
 						]))
@@ -8123,7 +8149,7 @@ var author$project$View$hourlyForecastDetailSummaryView = F2(
 							_List_fromArray(
 								[
 									elm$html$Html$text(
-									A2(author$project$HumanDates$prettyHourMinute, zone, detail.time) + (': ' + (A2(myrho$elm_round$Round$round, 0, detail.temperature) + 'º F, '))),
+									A2(author$project$HumanDates$prettyHourMinute, zone, detail.time) + (': ' + (A2(myrho$elm_round$Round$round, 0, detail.temperature) + 'º '))),
 									A2(author$project$View$weatherIconView, detail.icon, 0)
 								])),
 							A2(
@@ -8132,6 +8158,40 @@ var author$project$View$hourlyForecastDetailSummaryView = F2(
 							_List_fromArray(
 								[
 									elm$html$Html$text(detail.summary + '.')
+								])),
+							A2(
+							elm$html$Html$ul,
+							_List_fromArray(
+								[
+									elm$html$Html$Attributes$class('list-unstyled')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									elm$html$Html$li,
+									_List_Nil,
+									_List_fromArray(
+										[
+											elm$html$Html$text(
+											A3(author$project$View$precipitationText, detail.precipProbability, detail.precipIntensity, detail.precipType))
+										]))
+								])),
+							A2(
+							elm$html$Html$ul,
+							_List_fromArray(
+								[
+									elm$html$Html$Attributes$class('list-unstyled')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									elm$html$Html$li,
+									_List_Nil,
+									_List_fromArray(
+										[
+											elm$html$Html$text(
+											A3(author$project$View$windSpeedText, detail.windSpeed, detail.windGust, detail.windBearing))
+										]))
 								]))
 						]))
 				]));
@@ -11914,4 +11974,4 @@ var author$project$Main$main = elm$browser$Browser$element(
 		view: author$project$View$view
 	});
 _Platform_export({'Main':{'init':author$project$Main$main(
-	elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.0"},"types":{"message":"Main.Msg","aliases":{"Forecast.CurrentForecastSummary":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : Forecast.WeatherIcon, precipProbability : Basics.Float, temperature : Basics.Float, windSpeed : Basics.Float }"},"Forecast.DailyForecastDetail":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : Forecast.WeatherIcon, sunriseTime : Time.Posix, sunsetTime : Time.Posix, precipIntensity : Basics.Float, precipProbability : Basics.Float, precipType : String.String, temperatureHigh : Basics.Float, temperatureHighTime : Time.Posix, temperatureLow : Basics.Float, temperatureLowTime : Time.Posix, windSpeed : Basics.Float, windGust : Basics.Float, windBearing : Forecast.BearingDirection }"},"Forecast.DailyForecastSummary":{"args":[],"type":"{ summary : String.String, icon : Forecast.WeatherIcon, data : List.List Forecast.DailyForecastDetail }"},"Forecast.ForecastSummary":{"args":[],"type":"{ latitude : Basics.Float, longitude : Basics.Float, timezone : String.String, currentForecastSummary : Forecast.CurrentForecastSummary, hourlyForecastSummary : Forecast.HourlyForecastSummary, dailyForecastSummary : Forecast.DailyForecastSummary }"},"Forecast.HourlyForecastDetail":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : Forecast.WeatherIcon, precipIntensity : Basics.Float, precipProbability : Basics.Float, temperature : Basics.Float, windSpeed : Basics.Float, windGust : Basics.Float, windBearing : Forecast.BearingDirection }"},"Forecast.HourlyForecastSummary":{"args":[],"type":"{ summary : String.String, icon : Forecast.WeatherIcon, data : List.List Forecast.HourlyForecastDetail }"},"Time.Era":{"args":[],"type":"{ start : Basics.Int, offset : Basics.Int }"}},"unions":{"Main.Msg":{"args":[],"tags":{"GotForecastSummary":["Result.Result Http.Error Forecast.ForecastSummary"],"Here":["Time.Zone"]}},"Forecast.BearingDirection":{"args":[],"tags":{"North":[],"Northeast":[],"East":[],"Southeast":[],"South":[],"Southwest":[],"West":[],"Northwest":[]}},"Forecast.WeatherIcon":{"args":[],"tags":{"ClearDay":[],"ClearNight":[],"Rain":[],"Snow":[],"Sleet":[],"Wind":[],"Fog":[],"Cloudy":[],"PartlyCloudyDay":[],"PartlyCloudyNight":[]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"List.List":{"args":["a"],"tags":{}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Time.Zone":{"args":[],"tags":{"Zone":["Basics.Int","List.List Time.Era"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}}}}})}});}(this));
+	elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.0"},"types":{"message":"Main.Msg","aliases":{"Forecast.CurrentForecastSummary":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : Forecast.WeatherIcon, precipProbability : Basics.Float, temperature : Basics.Float, windSpeed : Basics.Float }"},"Forecast.DailyForecastDetail":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : Forecast.WeatherIcon, sunriseTime : Time.Posix, sunsetTime : Time.Posix, precipIntensity : Basics.Float, precipProbability : Basics.Float, precipType : String.String, temperatureHigh : Basics.Float, temperatureHighTime : Time.Posix, temperatureLow : Basics.Float, temperatureLowTime : Time.Posix, windSpeed : Basics.Float, windGust : Basics.Float, windBearing : Forecast.BearingDirection }"},"Forecast.DailyForecastSummary":{"args":[],"type":"{ summary : String.String, icon : Forecast.WeatherIcon, data : List.List Forecast.DailyForecastDetail }"},"Forecast.ForecastSummary":{"args":[],"type":"{ latitude : Basics.Float, longitude : Basics.Float, timezone : String.String, currentForecastSummary : Forecast.CurrentForecastSummary, hourlyForecastSummary : Forecast.HourlyForecastSummary, dailyForecastSummary : Forecast.DailyForecastSummary }"},"Forecast.HourlyForecastDetail":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : Forecast.WeatherIcon, precipIntensity : Basics.Float, precipProbability : Basics.Float, precipType : String.String, temperature : Basics.Float, windSpeed : Basics.Float, windGust : Basics.Float, windBearing : Forecast.BearingDirection }"},"Forecast.HourlyForecastSummary":{"args":[],"type":"{ summary : String.String, icon : Forecast.WeatherIcon, data : List.List Forecast.HourlyForecastDetail }"},"Time.Era":{"args":[],"type":"{ start : Basics.Int, offset : Basics.Int }"}},"unions":{"Main.Msg":{"args":[],"tags":{"GotForecastSummary":["Result.Result Http.Error Forecast.ForecastSummary"],"Here":["Time.Zone"]}},"Forecast.BearingDirection":{"args":[],"tags":{"North":[],"Northeast":[],"East":[],"Southeast":[],"South":[],"Southwest":[],"West":[],"Northwest":[]}},"Forecast.WeatherIcon":{"args":[],"tags":{"ClearDay":[],"ClearNight":[],"Rain":[],"Snow":[],"Sleet":[],"Wind":[],"Fog":[],"Cloudy":[],"PartlyCloudyDay":[],"PartlyCloudyNight":[]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"List.List":{"args":["a"],"tags":{}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Time.Zone":{"args":[],"tags":{"Zone":["Basics.Int","List.List Time.Era"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}}}}})}});}(this));
