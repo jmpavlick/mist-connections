@@ -16,5 +16,5 @@ type alias Model =
 
 type ApplicationView
     = CurrentForecast
-    | HourlyForecastSummaries
-    | DailyForecastSummaries
+    | HourlyForecasts
+    | DailyForecasts
