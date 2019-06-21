@@ -5530,13 +5530,9 @@ var NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required = F3(
 			A2(elm$json$Json$Decode$field, key, valDecoder),
 			decoder);
 	});
-var author$project$Forecast$ForecastSummary = F5(
-	function (latitude, longitude, timezone, hourlyForecastSummary, dailyForecastSummary) {
-		return {dailyForecastSummary: dailyForecastSummary, hourlyForecastSummary: hourlyForecastSummary, latitude: latitude, longitude: longitude, timezone: timezone};
-	});
-var author$project$Forecast$DailyForecastSummary = F3(
-	function (summary, icon, data) {
-		return {data: data, icon: icon, summary: summary};
+var author$project$Forecast$ForecastSummary = F6(
+	function (latitude, longitude, timezone, currentForecastSummary, hourlyForecastSummary, dailyForecastSummary) {
+		return {currentForecastSummary: currentForecastSummary, dailyForecastSummary: dailyForecastSummary, hourlyForecastSummary: hourlyForecastSummary, latitude: latitude, longitude: longitude, timezone: timezone};
 	});
 var elm$json$Json$Decode$andThen = _Json_andThen;
 var elm$json$Json$Decode$decodeValue = _Json_run;
@@ -5587,6 +5583,57 @@ var NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional = F4(
 				valDecoder,
 				fallback),
 			decoder);
+	});
+var author$project$Forecast$CurrentForecastSummary = F6(
+	function (time, summary, icon, precipProbability, temperature, windSpeed) {
+		return {icon: icon, precipProbability: precipProbability, summary: summary, temperature: temperature, time: time, windSpeed: windSpeed};
+	});
+var elm$json$Json$Decode$int = _Json_decodeInt;
+var elm$core$Basics$identity = function (x) {
+	return x;
+};
+var elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var elm$time$Time$millisToPosix = elm$time$Time$Posix;
+var author$project$Forecast$unixTimeDecoder = A2(
+	elm$json$Json$Decode$andThen,
+	function (x) {
+		return elm$json$Json$Decode$succeed(
+			elm$time$Time$millisToPosix(x * 1000));
+	},
+	elm$json$Json$Decode$int);
+var elm$json$Json$Decode$float = _Json_decodeFloat;
+var elm$json$Json$Decode$string = _Json_decodeString;
+var author$project$Forecast$currentForecastSummaryDecoder = A3(
+	NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+	'windSpeed',
+	elm$json$Json$Decode$float,
+	A3(
+		NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+		'temperature',
+		elm$json$Json$Decode$float,
+		A4(
+			NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+			'precipProbability',
+			elm$json$Json$Decode$float,
+			0,
+			A3(
+				NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+				'icon',
+				elm$json$Json$Decode$string,
+				A3(
+					NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+					'summary',
+					elm$json$Json$Decode$string,
+					A3(
+						NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+						'time',
+						author$project$Forecast$unixTimeDecoder,
+						elm$json$Json$Decode$succeed(author$project$Forecast$CurrentForecastSummary)))))));
+var author$project$Forecast$DailyForecastSummary = F3(
+	function (summary, icon, data) {
+		return {data: data, icon: icon, summary: summary};
 	});
 var author$project$Forecast$DailyForecastDetail = function (time) {
 	return function (summary) {
@@ -5716,7 +5763,6 @@ var elm$core$List$map = F2(
 			_List_Nil,
 			xs);
 	});
-var elm$json$Json$Decode$int = _Json_decodeInt;
 var author$project$Forecast$bearingDirectionDecoder = function () {
 	var bearingDirectionFromInt = function (degrees) {
 		var bearingDirectionMap = F2(
@@ -5806,22 +5852,6 @@ var author$project$Forecast$bearingDirectionDecoder = function () {
 		},
 		elm$json$Json$Decode$int);
 }();
-var elm$core$Basics$identity = function (x) {
-	return x;
-};
-var elm$time$Time$Posix = function (a) {
-	return {$: 'Posix', a: a};
-};
-var elm$time$Time$millisToPosix = elm$time$Time$Posix;
-var author$project$Forecast$unixTimeDecoder = A2(
-	elm$json$Json$Decode$andThen,
-	function (x) {
-		return elm$json$Json$Decode$succeed(
-			elm$time$Time$millisToPosix(x * 1000));
-	},
-	elm$json$Json$Decode$int);
-var elm$json$Json$Decode$float = _Json_decodeFloat;
-var elm$json$Json$Decode$string = _Json_decodeString;
 var author$project$Forecast$dailyForecastDetailDecoder = A3(
 	NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 	'windBearing',
@@ -5967,17 +5997,21 @@ var author$project$Forecast$forecastSummaryDecoder = A3(
 		author$project$Forecast$hourlyForecastSummaryDecoder,
 		A3(
 			NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-			'timezone',
-			elm$json$Json$Decode$string,
+			'currently',
+			author$project$Forecast$currentForecastSummaryDecoder,
 			A3(
 				NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-				'longitude',
-				elm$json$Json$Decode$float,
+				'timezone',
+				elm$json$Json$Decode$string,
 				A3(
 					NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-					'latitude',
+					'longitude',
 					elm$json$Json$Decode$float,
-					elm$json$Json$Decode$succeed(author$project$Forecast$ForecastSummary))))));
+					A3(
+						NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+						'latitude',
+						elm$json$Json$Decode$float,
+						elm$json$Json$Decode$succeed(author$project$Forecast$ForecastSummary)))))));
 var author$project$Main$GotForecastSummary = function (a) {
 	return {$: 'GotForecastSummary', a: a};
 };
@@ -10562,4 +10596,4 @@ var author$project$Main$main = elm$browser$Browser$element(
 		view: author$project$Main$view
 	});
 _Platform_export({'Main':{'init':author$project$Main$main(
-	elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.0"},"types":{"message":"Main.Msg","aliases":{"Forecast.DailyForecastDetail":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : String.String, sunriseTime : Time.Posix, sunsetTime : Time.Posix, precipIntensity : Basics.Float, precipProbability : Basics.Float, precipType : String.String, temperatureHigh : Basics.Float, temperatureHighTime : Time.Posix, temperatureLow : Basics.Float, temperatureLowTime : Time.Posix, windSpeed : Basics.Float, windGust : Basics.Float, windBearing : Forecast.BearingDirection }"},"Forecast.DailyForecastSummary":{"args":[],"type":"{ summary : String.String, icon : String.String, data : List.List Forecast.DailyForecastDetail }"},"Forecast.ForecastSummary":{"args":[],"type":"{ latitude : Basics.Float, longitude : Basics.Float, timezone : String.String, hourlyForecastSummary : Forecast.HourlyForecastSummary, dailyForecastSummary : Forecast.DailyForecastSummary }"},"Forecast.HourlyForecastDetail":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : String.String, precipIntensity : Basics.Float, precipProbability : Basics.Float, temperature : Basics.Float, windSpeed : Basics.Float, windGust : Basics.Float, windBearing : Forecast.BearingDirection }"},"Forecast.HourlyForecastSummary":{"args":[],"type":"{ summary : String.String, icon : String.String, data : List.List Forecast.HourlyForecastDetail }"}},"unions":{"Main.Msg":{"args":[],"tags":{"Increment":[],"Decrement":[],"GotForecastSummary":["Result.Result Http.Error Forecast.ForecastSummary"]}},"Forecast.BearingDirection":{"args":[],"tags":{"North":[],"NorthEast":[],"East":[],"SouthEast":[],"South":[],"SouthWest":[],"West":[],"NorthWest":[]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"List.List":{"args":["a"],"tags":{}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}}}}})}});}(this));
+	elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.0"},"types":{"message":"Main.Msg","aliases":{"Forecast.CurrentForecastSummary":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : String.String, precipProbability : Basics.Float, temperature : Basics.Float, windSpeed : Basics.Float }"},"Forecast.DailyForecastDetail":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : String.String, sunriseTime : Time.Posix, sunsetTime : Time.Posix, precipIntensity : Basics.Float, precipProbability : Basics.Float, precipType : String.String, temperatureHigh : Basics.Float, temperatureHighTime : Time.Posix, temperatureLow : Basics.Float, temperatureLowTime : Time.Posix, windSpeed : Basics.Float, windGust : Basics.Float, windBearing : Forecast.BearingDirection }"},"Forecast.DailyForecastSummary":{"args":[],"type":"{ summary : String.String, icon : String.String, data : List.List Forecast.DailyForecastDetail }"},"Forecast.ForecastSummary":{"args":[],"type":"{ latitude : Basics.Float, longitude : Basics.Float, timezone : String.String, currentForecastSummary : Forecast.CurrentForecastSummary, hourlyForecastSummary : Forecast.HourlyForecastSummary, dailyForecastSummary : Forecast.DailyForecastSummary }"},"Forecast.HourlyForecastDetail":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : String.String, precipIntensity : Basics.Float, precipProbability : Basics.Float, temperature : Basics.Float, windSpeed : Basics.Float, windGust : Basics.Float, windBearing : Forecast.BearingDirection }"},"Forecast.HourlyForecastSummary":{"args":[],"type":"{ summary : String.String, icon : String.String, data : List.List Forecast.HourlyForecastDetail }"}},"unions":{"Main.Msg":{"args":[],"tags":{"Increment":[],"Decrement":[],"GotForecastSummary":["Result.Result Http.Error Forecast.ForecastSummary"]}},"Forecast.BearingDirection":{"args":[],"tags":{"North":[],"NorthEast":[],"East":[],"SouthEast":[],"South":[],"SouthWest":[],"West":[],"NorthWest":[]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"List.List":{"args":["a"],"tags":{}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}}}}})}});}(this));

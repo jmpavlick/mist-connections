@@ -15,8 +15,19 @@ type alias ForecastSummary =
     { latitude : Float
     , longitude : Float
     , timezone : String
+    , currentForecastSummary : CurrentForecastSummary
     , hourlyForecastSummary : HourlyForecastSummary
     , dailyForecastSummary : DailyForecastSummary
+    }
+
+
+type alias CurrentForecastSummary =
+    { time : Posix
+    , summary : String
+    , icon : String
+    , precipProbability : Float
+    , temperature : Float
+    , windSpeed : Float
     }
 
 
@@ -87,8 +98,20 @@ forecastSummaryDecoder =
         |> required "latitude" float
         |> required "longitude" float
         |> required "timezone" string
+        |> required "currently" currentForecastSummaryDecoder
         |> required "hourly" hourlyForecastSummaryDecoder
         |> required "daily" dailyForecastSummaryDecoder
+
+
+currentForecastSummaryDecoder : Decoder CurrentForecastSummary
+currentForecastSummaryDecoder =
+    Decode.succeed CurrentForecastSummary
+        |> required "time" unixTimeDecoder
+        |> required "summary" string
+        |> required "icon" string
+        |> optional "precipProbability" float 0
+        |> required "temperature" float
+        |> required "windSpeed" float
 
 
 unixTimeDecoder : Decoder Posix
