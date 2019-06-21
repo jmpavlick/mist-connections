@@ -132,17 +132,9 @@ hourlyForecastDetailSummaryView detail zone =
                     |> text
                 , weatherIconView detail.icon 0
                 ]
-            , p [] [ detail.summary ++ "." |> text ]
-            , ul [ class "list-unstyled" ]
-                [ li []
-                    [ precipitationText detail.precipProbability detail.precipIntensity detail.precipType |> text
-                    ]
-                ]
-            , ul [ class "list-unstyled" ]
-                [ li []
-                    [ windSpeedText detail.windSpeed detail.windGust detail.windBearing |> text
-                    ]
-                ]
+            , div
+                []
+                [ hourlyForecastDetailDetailView detail zone ]
             ]
         ]
 
@@ -155,33 +147,47 @@ dailyForecastDetailSummaryView detail zone =
                 [ HumanDates.prettyDay zone detail.time ++ ": " |> text
                 , weatherIconView detail.icon 0
                 ]
-            , p [] [ text detail.summary ]
-            , ul [ class "list-unstyled" ]
-                [ li [] [ "High: " ++ Round.round 0 detail.temperatureHigh ++ "º at " ++ prettyHourMinute zone detail.temperatureHighTime |> text ]
-                , li [] [ "Low: " ++ Round.round 0 detail.temperatureLow ++ "º at " ++ prettyHourMinute zone detail.temperatureLowTime |> text ]
-                ]
-            , ul [ class "list-unstyled" ]
-                [ li []
-                    [ precipitationText detail.precipProbability detail.precipIntensity detail.precipType |> text
-                    ]
-                ]
-            , ul [ class "list-unstyled" ]
-                [ li []
-                    [ windSpeedText detail.windSpeed detail.windGust detail.windBearing |> text
-                    ]
-                ]
+            , div [] [ dailyForecastDetailDetailView detail zone ]
             ]
         ]
 
 
 hourlyForecastDetailDetailView : HourlyForecastDetail -> Zone -> Html msg
 hourlyForecastDetailDetailView detail zone =
-    div [] []
+    div []
+        [ p [] [ detail.summary ++ "." |> text ]
+        , ul [ class "list-unstyled" ]
+            [ li []
+                [ precipitationText detail.precipProbability detail.precipIntensity detail.precipType |> text
+                ]
+            ]
+        , ul [ class "list-unstyled" ]
+            [ li []
+                [ windSpeedText detail.windSpeed detail.windGust detail.windBearing |> text
+                ]
+            ]
+        ]
 
 
 dailyForecastDetailDetailView : DailyForecastDetail -> Zone -> Html msg
 dailyForecastDetailDetailView detail zone =
-    div [] []
+    div []
+        [ p [] [ text detail.summary ]
+        , ul [ class "list-unstyled" ]
+            [ li [] [ "High: " ++ Round.round 0 detail.temperatureHigh ++ "º at " ++ prettyHourMinute zone detail.temperatureHighTime |> text ]
+            , li [] [ "Low: " ++ Round.round 0 detail.temperatureLow ++ "º at " ++ prettyHourMinute zone detail.temperatureLowTime |> text ]
+            ]
+        , ul [ class "list-unstyled" ]
+            [ li []
+                [ precipitationText detail.precipProbability detail.precipIntensity detail.precipType |> text
+                ]
+            ]
+        , ul [ class "list-unstyled" ]
+            [ li []
+                [ windSpeedText detail.windSpeed detail.windGust detail.windBearing |> text
+                ]
+            ]
+        ]
 
 
 windSpeedText : Float -> Float -> BearingDirection -> String

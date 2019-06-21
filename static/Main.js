@@ -7759,6 +7759,123 @@ var author$project$View$precipitationText = F3(
 			return A2(myrho$elm_round$Round$round, 0, precipProbability) + ('% chance of ' + (precipType + (accumulationClause + '.')));
 		}
 	});
+var author$project$Forecast$bearingDirectionToString = function (b) {
+	switch (b.$) {
+		case 'North':
+			return 'North';
+		case 'Northeast':
+			return 'Northeast';
+		case 'East':
+			return 'East';
+		case 'Southeast':
+			return 'Southeast';
+		case 'South':
+			return 'South';
+		case 'Southwest':
+			return 'Southwest';
+		case 'West':
+			return 'West';
+		default:
+			return 'Northwest';
+	}
+};
+var elm$core$String$toLower = _String_toLower;
+var author$project$View$windSpeedText = F3(
+	function (windSpeed, windGust, bearingDirection) {
+		var _n0 = windSpeed > 0;
+		if (!_n0) {
+			return 'No wind today.';
+		} else {
+			var gustsClause = function () {
+				var _n1 = windGust > 0;
+				if (!_n1) {
+					return '';
+				} else {
+					return ', with gusts of up to ' + (A2(myrho$elm_round$Round$round, 0, windGust) + ' MPH');
+				}
+			}();
+			return A2(myrho$elm_round$Round$round, 0, windSpeed) + (' MPH wind, coming from the ' + (elm$core$String$toLower(
+				author$project$Forecast$bearingDirectionToString(bearingDirection)) + (gustsClause + '.')));
+		}
+	});
+var elm$html$Html$li = _VirtualDom_node('li');
+var elm$html$Html$p = _VirtualDom_node('p');
+var elm$html$Html$ul = _VirtualDom_node('ul');
+var author$project$View$dailyForecastDetailDetailView = F2(
+	function (detail, zone) {
+		return A2(
+			elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					elm$html$Html$p,
+					_List_Nil,
+					_List_fromArray(
+						[
+							elm$html$Html$text(detail.summary)
+						])),
+					A2(
+					elm$html$Html$ul,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('list-unstyled')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$li,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text(
+									'High: ' + (A2(myrho$elm_round$Round$round, 0, detail.temperatureHigh) + ('º at ' + A2(author$project$HumanDates$prettyHourMinute, zone, detail.temperatureHighTime))))
+								])),
+							A2(
+							elm$html$Html$li,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text(
+									'Low: ' + (A2(myrho$elm_round$Round$round, 0, detail.temperatureLow) + ('º at ' + A2(author$project$HumanDates$prettyHourMinute, zone, detail.temperatureLowTime))))
+								]))
+						])),
+					A2(
+					elm$html$Html$ul,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('list-unstyled')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$li,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text(
+									A3(author$project$View$precipitationText, detail.precipProbability, detail.precipIntensity, detail.precipType))
+								]))
+						])),
+					A2(
+					elm$html$Html$ul,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('list-unstyled')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$li,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text(
+									A3(author$project$View$windSpeedText, detail.windSpeed, detail.windGust, detail.windBearing))
+								]))
+						]))
+				]));
+	});
 var author$project$Forecast$weatherIconAsClass = function (icon) {
 	return 'wi wi-' + function () {
 		switch (icon.$) {
@@ -7807,49 +7924,7 @@ var author$project$View$weatherIconView = F2(
 					_List_Nil)
 				]));
 	});
-var author$project$Forecast$bearingDirectionToString = function (b) {
-	switch (b.$) {
-		case 'North':
-			return 'North';
-		case 'Northeast':
-			return 'Northeast';
-		case 'East':
-			return 'East';
-		case 'Southeast':
-			return 'Southeast';
-		case 'South':
-			return 'South';
-		case 'Southwest':
-			return 'Southwest';
-		case 'West':
-			return 'West';
-		default:
-			return 'Northwest';
-	}
-};
-var elm$core$String$toLower = _String_toLower;
-var author$project$View$windSpeedText = F3(
-	function (windSpeed, windGust, bearingDirection) {
-		var _n0 = windSpeed > 0;
-		if (!_n0) {
-			return 'No wind today.';
-		} else {
-			var gustsClause = function () {
-				var _n1 = windGust > 0;
-				if (!_n1) {
-					return '';
-				} else {
-					return ', with gusts of up to ' + (A2(myrho$elm_round$Round$round, 0, windGust) + ' MPH');
-				}
-			}();
-			return A2(myrho$elm_round$Round$round, 0, windSpeed) + (' MPH wind, coming from the ' + (elm$core$String$toLower(
-				author$project$Forecast$bearingDirectionToString(bearingDirection)) + (gustsClause + '.')));
-		}
-	});
 var elm$html$Html$h5 = _VirtualDom_node('h5');
-var elm$html$Html$li = _VirtualDom_node('li');
-var elm$html$Html$p = _VirtualDom_node('p');
-var elm$html$Html$ul = _VirtualDom_node('ul');
 var author$project$View$dailyForecastDetailSummaryView = F2(
 	function (detail, zone) {
 		return A2(
@@ -7878,70 +7953,11 @@ var author$project$View$dailyForecastDetailSummaryView = F2(
 									A2(author$project$View$weatherIconView, detail.icon, 0)
 								])),
 							A2(
-							elm$html$Html$p,
+							elm$html$Html$div,
 							_List_Nil,
 							_List_fromArray(
 								[
-									elm$html$Html$text(detail.summary)
-								])),
-							A2(
-							elm$html$Html$ul,
-							_List_fromArray(
-								[
-									elm$html$Html$Attributes$class('list-unstyled')
-								]),
-							_List_fromArray(
-								[
-									A2(
-									elm$html$Html$li,
-									_List_Nil,
-									_List_fromArray(
-										[
-											elm$html$Html$text(
-											'High: ' + (A2(myrho$elm_round$Round$round, 0, detail.temperatureHigh) + ('º at ' + A2(author$project$HumanDates$prettyHourMinute, zone, detail.temperatureHighTime))))
-										])),
-									A2(
-									elm$html$Html$li,
-									_List_Nil,
-									_List_fromArray(
-										[
-											elm$html$Html$text(
-											'Low: ' + (A2(myrho$elm_round$Round$round, 0, detail.temperatureLow) + ('º at ' + A2(author$project$HumanDates$prettyHourMinute, zone, detail.temperatureLowTime))))
-										]))
-								])),
-							A2(
-							elm$html$Html$ul,
-							_List_fromArray(
-								[
-									elm$html$Html$Attributes$class('list-unstyled')
-								]),
-							_List_fromArray(
-								[
-									A2(
-									elm$html$Html$li,
-									_List_Nil,
-									_List_fromArray(
-										[
-											elm$html$Html$text(
-											A3(author$project$View$precipitationText, detail.precipProbability, detail.precipIntensity, detail.precipType))
-										]))
-								])),
-							A2(
-							elm$html$Html$ul,
-							_List_fromArray(
-								[
-									elm$html$Html$Attributes$class('list-unstyled')
-								]),
-							_List_fromArray(
-								[
-									A2(
-									elm$html$Html$li,
-									_List_Nil,
-									_List_fromArray(
-										[
-											elm$html$Html$text(
-											A3(author$project$View$windSpeedText, detail.windSpeed, detail.windGust, detail.windBearing))
-										]))
+									A2(author$project$View$dailyForecastDetailDetailView, detail, zone)
 								]))
 						]))
 				]));
@@ -8125,6 +8141,56 @@ var author$project$View$dailyForecastSummaryView = F2(
 					},
 					next5days)));
 	});
+var author$project$View$hourlyForecastDetailDetailView = F2(
+	function (detail, zone) {
+		return A2(
+			elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					elm$html$Html$p,
+					_List_Nil,
+					_List_fromArray(
+						[
+							elm$html$Html$text(detail.summary + '.')
+						])),
+					A2(
+					elm$html$Html$ul,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('list-unstyled')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$li,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text(
+									A3(author$project$View$precipitationText, detail.precipProbability, detail.precipIntensity, detail.precipType))
+								]))
+						])),
+					A2(
+					elm$html$Html$ul,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('list-unstyled')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$li,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text(
+									A3(author$project$View$windSpeedText, detail.windSpeed, detail.windGust, detail.windBearing))
+								]))
+						]))
+				]));
+	});
 var author$project$View$hourlyForecastDetailSummaryView = F2(
 	function (detail, zone) {
 		return A2(
@@ -8153,45 +8219,11 @@ var author$project$View$hourlyForecastDetailSummaryView = F2(
 									A2(author$project$View$weatherIconView, detail.icon, 0)
 								])),
 							A2(
-							elm$html$Html$p,
+							elm$html$Html$div,
 							_List_Nil,
 							_List_fromArray(
 								[
-									elm$html$Html$text(detail.summary + '.')
-								])),
-							A2(
-							elm$html$Html$ul,
-							_List_fromArray(
-								[
-									elm$html$Html$Attributes$class('list-unstyled')
-								]),
-							_List_fromArray(
-								[
-									A2(
-									elm$html$Html$li,
-									_List_Nil,
-									_List_fromArray(
-										[
-											elm$html$Html$text(
-											A3(author$project$View$precipitationText, detail.precipProbability, detail.precipIntensity, detail.precipType))
-										]))
-								])),
-							A2(
-							elm$html$Html$ul,
-							_List_fromArray(
-								[
-									elm$html$Html$Attributes$class('list-unstyled')
-								]),
-							_List_fromArray(
-								[
-									A2(
-									elm$html$Html$li,
-									_List_Nil,
-									_List_fromArray(
-										[
-											elm$html$Html$text(
-											A3(author$project$View$windSpeedText, detail.windSpeed, detail.windGust, detail.windBearing))
-										]))
+									A2(author$project$View$hourlyForecastDetailDetailView, detail, zone)
 								]))
 						]))
 				]));
