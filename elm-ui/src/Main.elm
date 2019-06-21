@@ -2,9 +2,11 @@ module Main exposing (Model, Msg(..), initialModel, main, update, view)
 
 import Browser
 import Forecast exposing (..)
-import Html exposing (Html, button, div, text)
+import Html exposing (..)
+import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http exposing (..)
+import Round
 
 
 main =
@@ -33,7 +35,6 @@ initialModel =
         }
     , forecastSummary = Nothing
     , errorData = []
-    , demoModelField = 0
     }
 
 
@@ -41,7 +42,6 @@ type alias Model =
     { location : Location
     , forecastSummary : Maybe ForecastSummary
     , errorData : List Http.Error
-    , demoModelField : Int
     }
 
 
@@ -50,9 +50,7 @@ type alias Model =
 
 
 type Msg
-    = Increment
-    | Decrement
-    | GotForecastSummary (Result Http.Error ForecastSummary)
+    = GotForecastSummary (Result Http.Error ForecastSummary)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -67,12 +65,6 @@ update msg model =
             { model | errorData = err :: model.errorData }
     in
     case msg of
-        Increment ->
-            ( { model | demoModelField = model.demoModelField + 1 }, Cmd.none )
-
-        Decrement ->
-            ( { model | demoModelField = model.demoModelField - 1 }, Cmd.none )
-
         GotForecastSummary result ->
             case result of
                 Err e ->
@@ -82,11 +74,72 @@ update msg model =
                     ( { model | forecastSummary = Just summary }, Cmd.none )
 
 
+
+-- VIEW
+
+
+weatherIconView : WeatherIcon -> Html Msg
+weatherIconView icon =
+    i [ weatherIconAsClass icon |> class ] []
+
+
+view : Model -> Html Msg
 view model =
-    div []
-        [ button [ onClick Decrement ] [ text "-" ]
-        , div [] [ text (String.fromInt model.demoModelField) ]
-        , button [ onClick Increment ] [ text "+" ]
+    div [ class "container-fluid" ] <|
+        case model.forecastSummary of
+            Nothing ->
+                [ div [ class "row" ] [ div [ class "col" ] [ h1 [] [ text "Mist Opportunities" ] ] ]
+                , div [ class "row" ] [ div [ class "col" ] [ h2 [] [ text "Loading..." ] ] ]
+                ]
+
+            Just summary ->
+                [ div [ class "row" ] [ div [ class "col" ] [ h1 [] [ text "Mist Opportunities" ] ] ]
+                , div [ class "row" ]
+                    [ div [ class "col" ]
+                        [ h2 []
+                            [ text "Currently: "
+                            , weatherIconView summary.currentForecastSummary.icon
+                            ]
+                        ]
+                    ]
+                , div [ class "row" ] [ div [ class "col" ] [ currentForecastSummaryView summary.currentForecastSummary ] ]
+                ]
+
+
+currentForecastSummaryView : CurrentForecastSummary -> Html Msg
+currentForecastSummaryView summary =
+    div [ class "container-fluid" ]
+        [ div [ class "row" ]
+            [ div [ class "col" ]
+                [ h3 []
+                    [ summary.summary
+                        ++ ". It's "
+                        ++ Round.round 0 summary.temperature
+                        ++ "º F outside."
+                        |> text
+                    ]
+                ]
+            ]
+        , div [ class "row" ]
+            [ div [ class "col" ]
+                [ h4 []
+                    [ let
+                        precipProbabilityFragment =
+                            case Round.round 0 summary.precipProbability of
+                                "0" ->
+                                    "Right now, "
+
+                                p ->
+                                    "Right now, there's a " ++ p ++ "% chance of precipitation, and "
+                      in
+                      precipProbabilityFragment
+                        ++ "the wind is blowing at "
+                        ++ Round.round 0 summary.windSpeed
+                        ++ " MPH."
+                        |> text
+                    ]
+                ]
+            ]
         ]
 
 

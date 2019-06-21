@@ -1,4 +1,4 @@
-module Forecast exposing (BearingDirection(..), DailyForecastDetail, DailyForecastSummary, ForecastSummary, HourlyForecastDetail, HourlyForecastSummary, Location, bearingDirectionDecoder, dailyForecastDetailDecoder, dailyForecastSummaryDecoder, forecastSummaryDecoder, hourlyForecastDetailDecoder, hourlyForecastSummaryDecoder, unixTimeDecoder)
+module Forecast exposing (BearingDirection(..), CurrentForecastSummary, DailyForecastDetail, DailyForecastSummary, ForecastSummary, HourlyForecastDetail, HourlyForecastSummary, Location, WeatherIcon(..), bearingDirectionDecoder, currentForecastSummaryDecoder, dailyForecastDetailDecoder, dailyForecastSummaryDecoder, forecastSummaryDecoder, hourlyForecastDetailDecoder, hourlyForecastSummaryDecoder, unixTimeDecoder, weatherIconAsClass, weatherIconDecoder)
 
 import Json.Decode as Decode exposing (Decoder, andThen, float, int, list, string)
 import Json.Decode.Pipeline as Pipeline exposing (optional, required)
@@ -24,7 +24,7 @@ type alias ForecastSummary =
 type alias CurrentForecastSummary =
     { time : Posix
     , summary : String
-    , icon : String
+    , icon : WeatherIcon
     , precipProbability : Float
     , temperature : Float
     , windSpeed : Float
@@ -33,14 +33,14 @@ type alias CurrentForecastSummary =
 
 type alias HourlyForecastSummary =
     { summary : String
-    , icon : String
+    , icon : WeatherIcon
     , data : List HourlyForecastDetail
     }
 
 
 type alias DailyForecastSummary =
     { summary : String
-    , icon : String
+    , icon : WeatherIcon
     , data : List DailyForecastDetail
     }
 
@@ -56,10 +56,59 @@ type BearingDirection
     | NorthWest
 
 
+type WeatherIcon
+    = ClearDay
+    | ClearNight
+    | Rain
+    | Snow
+    | Sleet
+    | Wind
+    | Fog
+    | Cloudy
+    | PartlyCloudyDay
+    | PartlyCloudyNight
+
+
+weatherIconAsClass : WeatherIcon -> String
+weatherIconAsClass icon =
+    "wi wi-"
+        ++ (case icon of
+                ClearDay ->
+                    "day-sunny"
+
+                ClearNight ->
+                    "night-clear"
+
+                Rain ->
+                    "rain"
+
+                Snow ->
+                    "snow"
+
+                Sleet ->
+                    "sleet"
+
+                Wind ->
+                    "strong-wind"
+
+                Fog ->
+                    "fog"
+
+                Cloudy ->
+                    "cloudy"
+
+                PartlyCloudyDay ->
+                    "day-cloudy"
+
+                PartlyCloudyNight ->
+                    "night-alt-cloudy"
+           )
+
+
 type alias HourlyForecastDetail =
     { time : Posix
     , summary : String
-    , icon : String
+    , icon : WeatherIcon
     , precipIntensity : Float
     , precipProbability : Float
     , temperature : Float
@@ -72,7 +121,7 @@ type alias HourlyForecastDetail =
 type alias DailyForecastDetail =
     { time : Posix
     , summary : String
-    , icon : String
+    , icon : WeatherIcon
     , sunriseTime : Posix
     , sunsetTime : Posix
     , precipIntensity : Float
@@ -108,7 +157,7 @@ currentForecastSummaryDecoder =
     Decode.succeed CurrentForecastSummary
         |> required "time" unixTimeDecoder
         |> required "summary" string
-        |> required "icon" string
+        |> required "icon" weatherIconDecoder
         |> optional "precipProbability" float 0
         |> required "temperature" float
         |> required "windSpeed" float
@@ -189,7 +238,7 @@ dailyForecastSummaryDecoder : Decoder DailyForecastSummary
 dailyForecastSummaryDecoder =
     Decode.succeed DailyForecastSummary
         |> required "summary" string
-        |> required "icon" string
+        |> required "icon" weatherIconDecoder
         |> required "data" (list dailyForecastDetailDecoder)
 
 
@@ -198,7 +247,7 @@ dailyForecastDetailDecoder =
     Decode.succeed DailyForecastDetail
         |> required "time" unixTimeDecoder
         |> required "summary" string
-        |> required "icon" string
+        |> required "icon" weatherIconDecoder
         |> required "sunriseTime" unixTimeDecoder
         |> required "sunsetTime" unixTimeDecoder
         |> required "precipIntensity" float
@@ -218,7 +267,7 @@ hourlyForecastDetailDecoder =
     Decode.succeed HourlyForecastDetail
         |> required "time" unixTimeDecoder
         |> required "summary" string
-        |> required "icon" string
+        |> required "icon" weatherIconDecoder
         |> required "precipIntensity" float
         |> required "precipProbability" float
         |> required "temperature" float
@@ -231,5 +280,47 @@ hourlyForecastSummaryDecoder : Decoder HourlyForecastSummary
 hourlyForecastSummaryDecoder =
     Decode.succeed HourlyForecastSummary
         |> required "summary" string
-        |> required "icon" string
+        |> required "icon" weatherIconDecoder
         |> required "data" (list hourlyForecastDetailDecoder)
+
+
+weatherIconDecoder : Decoder WeatherIcon
+weatherIconDecoder =
+    string
+        |> andThen
+            (\x ->
+                Decode.succeed <|
+                    case x of
+                        "clear-day" ->
+                            ClearDay
+
+                        "clear-night" ->
+                            ClearNight
+
+                        "rain" ->
+                            Rain
+
+                        "snow" ->
+                            Snow
+
+                        "sleet" ->
+                            Sleet
+
+                        "wind" ->
+                            Wind
+
+                        "fog" ->
+                            Fog
+
+                        "cloudy" ->
+                            Cloudy
+
+                        "partly-cloudy-day" ->
+                            PartlyCloudyDay
+
+                        "partly-cloudy-night" ->
+                            PartlyCloudyNight
+
+                        _ ->
+                            Cloudy
+            )

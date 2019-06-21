@@ -5603,8 +5603,50 @@ var author$project$Forecast$unixTimeDecoder = A2(
 			elm$time$Time$millisToPosix(x * 1000));
 	},
 	elm$json$Json$Decode$int);
-var elm$json$Json$Decode$float = _Json_decodeFloat;
+var author$project$Forecast$ClearDay = {$: 'ClearDay'};
+var author$project$Forecast$ClearNight = {$: 'ClearNight'};
+var author$project$Forecast$Cloudy = {$: 'Cloudy'};
+var author$project$Forecast$Fog = {$: 'Fog'};
+var author$project$Forecast$PartlyCloudyDay = {$: 'PartlyCloudyDay'};
+var author$project$Forecast$PartlyCloudyNight = {$: 'PartlyCloudyNight'};
+var author$project$Forecast$Rain = {$: 'Rain'};
+var author$project$Forecast$Sleet = {$: 'Sleet'};
+var author$project$Forecast$Snow = {$: 'Snow'};
+var author$project$Forecast$Wind = {$: 'Wind'};
 var elm$json$Json$Decode$string = _Json_decodeString;
+var author$project$Forecast$weatherIconDecoder = A2(
+	elm$json$Json$Decode$andThen,
+	function (x) {
+		return elm$json$Json$Decode$succeed(
+			function () {
+				switch (x) {
+					case 'clear-day':
+						return author$project$Forecast$ClearDay;
+					case 'clear-night':
+						return author$project$Forecast$ClearNight;
+					case 'rain':
+						return author$project$Forecast$Rain;
+					case 'snow':
+						return author$project$Forecast$Snow;
+					case 'sleet':
+						return author$project$Forecast$Sleet;
+					case 'wind':
+						return author$project$Forecast$Wind;
+					case 'fog':
+						return author$project$Forecast$Fog;
+					case 'cloudy':
+						return author$project$Forecast$Cloudy;
+					case 'partly-cloudy-day':
+						return author$project$Forecast$PartlyCloudyDay;
+					case 'partly-cloudy-night':
+						return author$project$Forecast$PartlyCloudyNight;
+					default:
+						return author$project$Forecast$Cloudy;
+				}
+			}());
+	},
+	elm$json$Json$Decode$string);
+var elm$json$Json$Decode$float = _Json_decodeFloat;
 var author$project$Forecast$currentForecastSummaryDecoder = A3(
 	NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 	'windSpeed',
@@ -5621,7 +5663,7 @@ var author$project$Forecast$currentForecastSummaryDecoder = A3(
 			A3(
 				NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 				'icon',
-				elm$json$Json$Decode$string,
+				author$project$Forecast$weatherIconDecoder,
 				A3(
 					NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 					'summary',
@@ -5905,7 +5947,7 @@ var author$project$Forecast$dailyForecastDetailDecoder = A3(
 												A3(
 													NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 													'icon',
-													elm$json$Json$Decode$string,
+													author$project$Forecast$weatherIconDecoder,
 													A3(
 														NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 														'summary',
@@ -5923,7 +5965,7 @@ var author$project$Forecast$dailyForecastSummaryDecoder = A3(
 	A3(
 		NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 		'icon',
-		elm$json$Json$Decode$string,
+		author$project$Forecast$weatherIconDecoder,
 		A3(
 			NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 			'summary',
@@ -5964,7 +6006,7 @@ var author$project$Forecast$hourlyForecastDetailDecoder = A3(
 						A3(
 							NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 							'icon',
-							elm$json$Json$Decode$string,
+							author$project$Forecast$weatherIconDecoder,
 							A3(
 								NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 								'summary',
@@ -5981,7 +6023,7 @@ var author$project$Forecast$hourlyForecastSummaryDecoder = A3(
 	A3(
 		NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 		'icon',
-		elm$json$Json$Decode$string,
+		author$project$Forecast$weatherIconDecoder,
 		A3(
 			NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 			'summary',
@@ -6852,7 +6894,6 @@ var elm$core$Basics$negate = function (n) {
 	return -n;
 };
 var author$project$Main$initialModel = {
-	demoModelField: 0,
 	errorData: _List_Nil,
 	forecastSummary: elm$core$Maybe$Nothing,
 	location: {latitude: 37, longitude: -122}
@@ -6875,40 +6916,23 @@ var author$project$Main$update = F2(
 					errorData: A2(elm$core$List$cons, err, model.errorData)
 				});
 		};
-		switch (msg.$) {
-			case 'Increment':
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{demoModelField: model.demoModelField + 1}),
-					elm$core$Platform$Cmd$none);
-			case 'Decrement':
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{demoModelField: model.demoModelField - 1}),
-					elm$core$Platform$Cmd$none);
-			default:
-				var result = msg.a;
-				if (result.$ === 'Err') {
-					var e = result.a;
-					return _Utils_Tuple2(
-						addErrorData(e),
-						elm$core$Platform$Cmd$none);
-				} else {
-					var summary = result.a;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								forecastSummary: elm$core$Maybe$Just(summary)
-							}),
-						elm$core$Platform$Cmd$none);
-				}
+		var result = msg.a;
+		if (result.$ === 'Err') {
+			var e = result.a;
+			return _Utils_Tuple2(
+				addErrorData(e),
+				elm$core$Platform$Cmd$none);
+		} else {
+			var summary = result.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						forecastSummary: elm$core$Maybe$Just(summary)
+					}),
+				elm$core$Platform$Cmd$none);
 		}
 	});
-var author$project$Main$Decrement = {$: 'Decrement'};
-var author$project$Main$Increment = {$: 'Increment'};
 var elm$json$Json$Decode$map = _Json_map1;
 var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 	switch (handler.$) {
@@ -6922,62 +6946,565 @@ var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 			return 3;
 	}
 };
-var elm$html$Html$button = _VirtualDom_node('button');
 var elm$html$Html$div = _VirtualDom_node('div');
+var elm$html$Html$h3 = _VirtualDom_node('h3');
+var elm$html$Html$h4 = _VirtualDom_node('h4');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
-var elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
-};
-var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var elm$html$Html$Events$on = F2(
-	function (event, decoder) {
+var elm$json$Json$Encode$string = _Json_wrap;
+var elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
 		return A2(
-			elm$virtual_dom$VirtualDom$on,
-			event,
-			elm$virtual_dom$VirtualDom$Normal(decoder));
+			_VirtualDom_property,
+			key,
+			elm$json$Json$Encode$string(string));
 	});
-var elm$html$Html$Events$onClick = function (msg) {
-	return A2(
-		elm$html$Html$Events$on,
-		'click',
-		elm$json$Json$Decode$succeed(msg));
+var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
+var elm$core$Basics$ge = _Utils_ge;
+var elm$core$Basics$not = _Basics_not;
+var elm$core$Basics$abs = function (n) {
+	return (n < 0) ? (-n) : n;
 };
-var author$project$Main$view = function (model) {
+var elm$core$Basics$isInfinite = _Basics_isInfinite;
+var elm$core$Basics$isNaN = _Basics_isNaN;
+var elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return elm$core$Maybe$Nothing;
+		}
+	});
+var elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var elm$core$String$length = _String_length;
+var elm$core$String$cons = _String_cons;
+var elm$core$String$fromChar = function (_char) {
+	return A2(elm$core$String$cons, _char, '');
+};
+var elm$core$Bitwise$and = _Bitwise_and;
+var elm$core$Bitwise$shiftRightBy = _Bitwise_shiftRightBy;
+var elm$core$String$repeatHelp = F3(
+	function (n, chunk, result) {
+		return (n <= 0) ? result : A3(
+			elm$core$String$repeatHelp,
+			n >> 1,
+			_Utils_ap(chunk, chunk),
+			(!(n & 1)) ? result : _Utils_ap(result, chunk));
+	});
+var elm$core$String$repeat = F2(
+	function (n, chunk) {
+		return A3(elm$core$String$repeatHelp, n, chunk, '');
+	});
+var elm$core$String$padRight = F3(
+	function (n, _char, string) {
+		return _Utils_ap(
+			string,
+			A2(
+				elm$core$String$repeat,
+				n - elm$core$String$length(string),
+				elm$core$String$fromChar(_char)));
+	});
+var elm$core$String$reverse = _String_reverse;
+var elm$core$String$slice = _String_slice;
+var elm$core$Basics$neq = _Utils_notEqual;
+var elm$core$List$any = F2(
+	function (isOkay, list) {
+		any:
+		while (true) {
+			if (!list.b) {
+				return false;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				if (isOkay(x)) {
+					return true;
+				} else {
+					var $temp$isOkay = isOkay,
+						$temp$list = xs;
+					isOkay = $temp$isOkay;
+					list = $temp$list;
+					continue any;
+				}
+			}
+		}
+	});
+var elm$core$String$foldr = _String_foldr;
+var elm$core$String$toList = function (string) {
+	return A3(elm$core$String$foldr, elm$core$List$cons, _List_Nil, string);
+};
+var myrho$elm_round$Round$addSign = F2(
+	function (signed, str) {
+		var isNotZero = A2(
+			elm$core$List$any,
+			function (c) {
+				return (!_Utils_eq(
+					c,
+					_Utils_chr('0'))) && (!_Utils_eq(
+					c,
+					_Utils_chr('.')));
+			},
+			elm$core$String$toList(str));
+		return _Utils_ap(
+			(signed && isNotZero) ? '-' : '',
+			str);
+	});
+var elm$core$Char$fromCode = _Char_fromCode;
+var myrho$elm_round$Round$increaseNum = function (_n0) {
+	var head = _n0.a;
+	var tail = _n0.b;
+	if (_Utils_eq(
+		head,
+		_Utils_chr('9'))) {
+		var _n1 = elm$core$String$uncons(tail);
+		if (_n1.$ === 'Nothing') {
+			return '01';
+		} else {
+			var headtail = _n1.a;
+			return A2(
+				elm$core$String$cons,
+				_Utils_chr('0'),
+				myrho$elm_round$Round$increaseNum(headtail));
+		}
+	} else {
+		var c = elm$core$Char$toCode(head);
+		return ((c >= 48) && (c < 57)) ? A2(
+			elm$core$String$cons,
+			elm$core$Char$fromCode(c + 1),
+			tail) : '0';
+	}
+};
+var myrho$elm_round$Round$splitComma = function (str) {
+	var _n0 = A2(elm$core$String$split, '.', str);
+	if (_n0.b) {
+		if (_n0.b.b) {
+			var before = _n0.a;
+			var _n1 = _n0.b;
+			var after = _n1.a;
+			return _Utils_Tuple2(before, after);
+		} else {
+			var before = _n0.a;
+			return _Utils_Tuple2(before, '0');
+		}
+	} else {
+		return _Utils_Tuple2('0', '0');
+	}
+};
+var elm$core$String$dropLeft = F2(
+	function (n, string) {
+		return (n < 1) ? string : A3(
+			elm$core$String$slice,
+			n,
+			elm$core$String$length(string),
+			string);
+	});
+var elm$core$String$startsWith = _String_startsWith;
+var elm$core$String$toInt = _String_toInt;
+var elm$core$Tuple$mapFirst = F2(
+	function (func, _n0) {
+		var x = _n0.a;
+		var y = _n0.b;
+		return _Utils_Tuple2(
+			func(x),
+			y);
+	});
+var myrho$elm_round$Round$toDecimal = function (fl) {
+	var _n0 = A2(
+		elm$core$String$split,
+		'e',
+		elm$core$String$fromFloat(
+			elm$core$Basics$abs(fl)));
+	if (_n0.b) {
+		if (_n0.b.b) {
+			var num = _n0.a;
+			var _n1 = _n0.b;
+			var exp = _n1.a;
+			var e = A2(
+				elm$core$Maybe$withDefault,
+				0,
+				elm$core$String$toInt(
+					A2(elm$core$String$startsWith, '+', exp) ? A2(elm$core$String$dropLeft, 1, exp) : exp));
+			var _n2 = myrho$elm_round$Round$splitComma(num);
+			var before = _n2.a;
+			var after = _n2.b;
+			var total = _Utils_ap(before, after);
+			var zeroed = (e < 0) ? A2(
+				elm$core$Maybe$withDefault,
+				'0',
+				A2(
+					elm$core$Maybe$map,
+					function (_n3) {
+						var a = _n3.a;
+						var b = _n3.b;
+						return a + ('.' + b);
+					},
+					A2(
+						elm$core$Maybe$map,
+						elm$core$Tuple$mapFirst(elm$core$String$fromChar),
+						elm$core$String$uncons(
+							_Utils_ap(
+								A2(
+									elm$core$String$repeat,
+									elm$core$Basics$abs(e),
+									'0'),
+								total))))) : A3(
+				elm$core$String$padRight,
+				e + 1,
+				_Utils_chr('0'),
+				total);
+			return _Utils_ap(
+				(fl < 0) ? '-' : '',
+				zeroed);
+		} else {
+			var num = _n0.a;
+			return _Utils_ap(
+				(fl < 0) ? '-' : '',
+				num);
+		}
+	} else {
+		return '';
+	}
+};
+var myrho$elm_round$Round$roundFun = F3(
+	function (functor, s, fl) {
+		if (elm$core$Basics$isInfinite(fl) || elm$core$Basics$isNaN(fl)) {
+			return elm$core$String$fromFloat(fl);
+		} else {
+			var signed = fl < 0;
+			var _n0 = myrho$elm_round$Round$splitComma(
+				myrho$elm_round$Round$toDecimal(
+					elm$core$Basics$abs(fl)));
+			var before = _n0.a;
+			var after = _n0.b;
+			var r = elm$core$String$length(before) + s;
+			var normalized = _Utils_ap(
+				A2(elm$core$String$repeat, (-r) + 1, '0'),
+				A3(
+					elm$core$String$padRight,
+					r,
+					_Utils_chr('0'),
+					_Utils_ap(before, after)));
+			var totalLen = elm$core$String$length(normalized);
+			var roundDigitIndex = A2(elm$core$Basics$max, 1, r);
+			var increase = A2(
+				functor,
+				signed,
+				A3(elm$core$String$slice, roundDigitIndex, totalLen, normalized));
+			var remains = A3(elm$core$String$slice, 0, roundDigitIndex, normalized);
+			var num = increase ? elm$core$String$reverse(
+				A2(
+					elm$core$Maybe$withDefault,
+					'1',
+					A2(
+						elm$core$Maybe$map,
+						myrho$elm_round$Round$increaseNum,
+						elm$core$String$uncons(
+							elm$core$String$reverse(remains))))) : remains;
+			var numLen = elm$core$String$length(num);
+			var numZeroed = (num === '0') ? num : ((s <= 0) ? _Utils_ap(
+				num,
+				A2(
+					elm$core$String$repeat,
+					elm$core$Basics$abs(s),
+					'0')) : ((_Utils_cmp(
+				s,
+				elm$core$String$length(after)) < 0) ? (A3(elm$core$String$slice, 0, numLen - s, num) + ('.' + A3(elm$core$String$slice, numLen - s, numLen, num))) : _Utils_ap(
+				before + '.',
+				A3(
+					elm$core$String$padRight,
+					s,
+					_Utils_chr('0'),
+					after))));
+			return A2(myrho$elm_round$Round$addSign, signed, numZeroed);
+		}
+	});
+var myrho$elm_round$Round$round = myrho$elm_round$Round$roundFun(
+	F2(
+		function (signed, str) {
+			var _n0 = elm$core$String$uncons(str);
+			if (_n0.$ === 'Nothing') {
+				return false;
+			} else {
+				if ('5' === _n0.a.a.valueOf()) {
+					if (_n0.a.b === '') {
+						var _n1 = _n0.a;
+						return !signed;
+					} else {
+						var _n2 = _n0.a;
+						return true;
+					}
+				} else {
+					var _n3 = _n0.a;
+					var _int = _n3.a;
+					return function (i) {
+						return ((i > 53) && signed) || ((i >= 53) && (!signed));
+					}(
+						elm$core$Char$toCode(_int));
+				}
+			}
+		}));
+var author$project$Main$currentForecastSummaryView = function (summary) {
 	return A2(
 		elm$html$Html$div,
-		_List_Nil,
+		_List_fromArray(
+			[
+				elm$html$Html$Attributes$class('container-fluid')
+			]),
 		_List_fromArray(
 			[
 				A2(
-				elm$html$Html$button,
+				elm$html$Html$div,
 				_List_fromArray(
 					[
-						elm$html$Html$Events$onClick(author$project$Main$Decrement)
+						elm$html$Html$Attributes$class('row')
 					]),
 				_List_fromArray(
 					[
-						elm$html$Html$text('-')
+						A2(
+						elm$html$Html$div,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class('col')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								elm$html$Html$h3,
+								_List_Nil,
+								_List_fromArray(
+									[
+										elm$html$Html$text(
+										summary.summary + ('. It\'s ' + (A2(myrho$elm_round$Round$round, 0, summary.temperature) + 'º F outside.')))
+									]))
+							]))
 					])),
 				A2(
 				elm$html$Html$div,
-				_List_Nil,
 				_List_fromArray(
 					[
-						elm$html$Html$text(
-						elm$core$String$fromInt(model.demoModelField))
-					])),
-				A2(
-				elm$html$Html$button,
-				_List_fromArray(
-					[
-						elm$html$Html$Events$onClick(author$project$Main$Increment)
+						elm$html$Html$Attributes$class('row')
 					]),
 				_List_fromArray(
 					[
-						elm$html$Html$text('+')
+						A2(
+						elm$html$Html$div,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class('col')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								elm$html$Html$h4,
+								_List_Nil,
+								_List_fromArray(
+									[
+										function () {
+										var precipProbabilityFragment = function () {
+											var _n0 = A2(myrho$elm_round$Round$round, 0, summary.precipProbability);
+											if (_n0 === '0') {
+												return 'Right now, ';
+											} else {
+												var p = _n0;
+												return 'Right now, there\'s a ' + (p + '% chance of precipitation, and ');
+											}
+										}();
+										return elm$html$Html$text(
+											precipProbabilityFragment + ('the wind is blowing at ' + (A2(myrho$elm_round$Round$round, 0, summary.windSpeed) + ' MPH.')));
+									}()
+									]))
+							]))
 					]))
 			]));
+};
+var author$project$Forecast$weatherIconAsClass = function (icon) {
+	return 'wi wi-' + function () {
+		switch (icon.$) {
+			case 'ClearDay':
+				return 'day-sunny';
+			case 'ClearNight':
+				return 'night-clear';
+			case 'Rain':
+				return 'rain';
+			case 'Snow':
+				return 'snow';
+			case 'Sleet':
+				return 'sleet';
+			case 'Wind':
+				return 'strong-wind';
+			case 'Fog':
+				return 'fog';
+			case 'Cloudy':
+				return 'cloudy';
+			case 'PartlyCloudyDay':
+				return 'day-cloudy';
+			default:
+				return 'night-alt-cloudy';
+		}
+	}();
+};
+var elm$html$Html$i = _VirtualDom_node('i');
+var author$project$Main$weatherIconView = function (icon) {
+	return A2(
+		elm$html$Html$i,
+		_List_fromArray(
+			[
+				elm$html$Html$Attributes$class(
+				author$project$Forecast$weatherIconAsClass(icon))
+			]),
+		_List_Nil);
+};
+var elm$html$Html$h1 = _VirtualDom_node('h1');
+var elm$html$Html$h2 = _VirtualDom_node('h2');
+var author$project$Main$view = function (model) {
+	return A2(
+		elm$html$Html$div,
+		_List_fromArray(
+			[
+				elm$html$Html$Attributes$class('container-fluid')
+			]),
+		function () {
+			var _n0 = model.forecastSummary;
+			if (_n0.$ === 'Nothing') {
+				return _List_fromArray(
+					[
+						A2(
+						elm$html$Html$div,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class('row')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								elm$html$Html$div,
+								_List_fromArray(
+									[
+										elm$html$Html$Attributes$class('col')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										elm$html$Html$h1,
+										_List_Nil,
+										_List_fromArray(
+											[
+												elm$html$Html$text('Mist Opportunities')
+											]))
+									]))
+							])),
+						A2(
+						elm$html$Html$div,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class('row')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								elm$html$Html$div,
+								_List_fromArray(
+									[
+										elm$html$Html$Attributes$class('col')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										elm$html$Html$h2,
+										_List_Nil,
+										_List_fromArray(
+											[
+												elm$html$Html$text('Loading...')
+											]))
+									]))
+							]))
+					]);
+			} else {
+				var summary = _n0.a;
+				return _List_fromArray(
+					[
+						A2(
+						elm$html$Html$div,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class('row')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								elm$html$Html$div,
+								_List_fromArray(
+									[
+										elm$html$Html$Attributes$class('col')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										elm$html$Html$h1,
+										_List_Nil,
+										_List_fromArray(
+											[
+												elm$html$Html$text('Mist Opportunities')
+											]))
+									]))
+							])),
+						A2(
+						elm$html$Html$div,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class('row')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								elm$html$Html$div,
+								_List_fromArray(
+									[
+										elm$html$Html$Attributes$class('col')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										elm$html$Html$h2,
+										_List_Nil,
+										_List_fromArray(
+											[
+												elm$html$Html$text('Currently: '),
+												author$project$Main$weatherIconView(summary.currentForecastSummary.icon)
+											]))
+									]))
+							])),
+						A2(
+						elm$html$Html$div,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class('row')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								elm$html$Html$div,
+								_List_fromArray(
+									[
+										elm$html$Html$Attributes$class('col')
+									]),
+								_List_fromArray(
+									[
+										author$project$Main$currentForecastSummaryView(summary.currentForecastSummary)
+									]))
+							]))
+					]);
+			}
+		}());
 };
 var elm$browser$Browser$External = function (a) {
 	return {$: 'External', a: a};
@@ -7183,14 +7710,6 @@ var elm$browser$Debugger$Overlay$viewProblemType = function (_n0) {
 var elm$html$Html$a = _VirtualDom_node('a');
 var elm$html$Html$p = _VirtualDom_node('p');
 var elm$html$Html$ul = _VirtualDom_node('ul');
-var elm$json$Json$Encode$string = _Json_wrap;
-var elm$html$Html$Attributes$stringProperty = F2(
-	function (key, string) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			elm$json$Json$Encode$string(string));
-	});
 var elm$html$Html$Attributes$href = function (url) {
 	return A2(
 		elm$html$Html$Attributes$stringProperty,
@@ -7246,8 +7765,26 @@ var elm$browser$Debugger$Overlay$viewBadMetadata = function (_n0) {
 };
 var elm$browser$Debugger$Overlay$Cancel = {$: 'Cancel'};
 var elm$browser$Debugger$Overlay$Proceed = {$: 'Proceed'};
+var elm$html$Html$button = _VirtualDom_node('button');
 var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
+var elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			elm$virtual_dom$VirtualDom$on,
+			event,
+			elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		elm$html$Html$Events$on,
+		'click',
+		elm$json$Json$Decode$succeed(msg));
+};
 var elm$browser$Debugger$Overlay$viewButtons = function (buttons) {
 	var btn = F2(
 		function (msg, string) {
@@ -7793,12 +8330,10 @@ var elm$browser$Debugger$Expando$seqTypeToString = F2(
 				return 'Array(' + (elm$core$String$fromInt(n) + ')');
 		}
 	});
-var elm$core$String$slice = _String_slice;
 var elm$core$String$left = F2(
 	function (n, string) {
 		return (n < 1) ? '' : A3(elm$core$String$slice, 0, n, string);
 	});
-var elm$core$String$length = _String_length;
 var elm$core$String$right = F2(
 	function (n, string) {
 		return (n < 1) ? '' : A3(
@@ -7868,15 +8403,6 @@ var elm$core$Dict$isEmpty = function (dict) {
 		return false;
 	}
 };
-var elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
-	});
 var elm$browser$Debugger$Expando$viewExtraTiny = function (value) {
 	if (value.$ === 'Record') {
 		var record = value.b;
@@ -8445,7 +8971,6 @@ var elm$browser$Debugger$Expando$viewSequenceOpen = function (values) {
 var elm$browser$Debugger$Main$ExpandoMsg = function (a) {
 	return {$: 'ExpandoMsg', a: a};
 };
-var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
 var elm$html$Html$Attributes$title = elm$html$Html$Attributes$stringProperty('title');
 var elm$browser$Debugger$History$viewMessage = F3(
 	function (currentIndex, index, msg) {
@@ -9296,7 +9821,6 @@ var elm$browser$Debugger$Expando$updateIndex = F3(
 				A3(elm$browser$Debugger$Expando$updateIndex, n - 1, func, xs));
 		}
 	});
-var elm$core$Basics$not = _Basics_not;
 var elm$browser$Debugger$Expando$update = F2(
 	function (msg, value) {
 		switch (value.$) {
@@ -9502,8 +10026,6 @@ var elm$browser$Debugger$History$addRecent = F3(
 	});
 var elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
 var elm$core$Array$bitMask = 4294967295 >>> (32 - elm$core$Array$shiftStep);
-var elm$core$Basics$ge = _Utils_ge;
-var elm$core$Bitwise$and = _Bitwise_and;
 var elm$core$Elm$JsArray$push = _JsArray_push;
 var elm$core$Elm$JsArray$singleton = _JsArray_singleton;
 var elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
@@ -10112,7 +10634,6 @@ var elm$browser$Debugger$Report$MessageChanged = F2(
 var elm$browser$Debugger$Report$SomethingChanged = function (a) {
 	return {$: 'SomethingChanged', a: a};
 };
-var elm$core$Basics$neq = _Utils_notEqual;
 var elm$browser$Debugger$Metadata$checkTypes = F2(
 	function (old, _new) {
 		return (!_Utils_eq(old.message, _new.message)) ? A2(elm$browser$Debugger$Report$MessageChanged, old.message, _new.message) : elm$browser$Debugger$Report$SomethingChanged(
@@ -10461,22 +10982,12 @@ var elm$core$Set$foldr = F3(
 			initialState,
 			dict);
 	});
-var elm$core$String$dropLeft = F2(
-	function (n, string) {
-		return (n < 1) ? string : A3(
-			elm$core$String$slice,
-			n,
-			elm$core$String$length(string),
-			string);
-	});
-var elm$core$String$startsWith = _String_startsWith;
 var elm$url$Url$Http = {$: 'Http'};
 var elm$url$Url$Https = {$: 'Https'};
 var elm$core$String$indexes = _String_indexes;
 var elm$core$String$isEmpty = function (string) {
 	return string === '';
 };
-var elm$core$String$toInt = _String_toInt;
 var elm$url$Url$Url = F6(
 	function (protocol, host, port_, path, query, fragment) {
 		return {fragment: fragment, host: host, path: path, port_: port_, protocol: protocol, query: query};
@@ -10596,4 +11107,4 @@ var author$project$Main$main = elm$browser$Browser$element(
 		view: author$project$Main$view
 	});
 _Platform_export({'Main':{'init':author$project$Main$main(
-	elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.0"},"types":{"message":"Main.Msg","aliases":{"Forecast.CurrentForecastSummary":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : String.String, precipProbability : Basics.Float, temperature : Basics.Float, windSpeed : Basics.Float }"},"Forecast.DailyForecastDetail":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : String.String, sunriseTime : Time.Posix, sunsetTime : Time.Posix, precipIntensity : Basics.Float, precipProbability : Basics.Float, precipType : String.String, temperatureHigh : Basics.Float, temperatureHighTime : Time.Posix, temperatureLow : Basics.Float, temperatureLowTime : Time.Posix, windSpeed : Basics.Float, windGust : Basics.Float, windBearing : Forecast.BearingDirection }"},"Forecast.DailyForecastSummary":{"args":[],"type":"{ summary : String.String, icon : String.String, data : List.List Forecast.DailyForecastDetail }"},"Forecast.ForecastSummary":{"args":[],"type":"{ latitude : Basics.Float, longitude : Basics.Float, timezone : String.String, currentForecastSummary : Forecast.CurrentForecastSummary, hourlyForecastSummary : Forecast.HourlyForecastSummary, dailyForecastSummary : Forecast.DailyForecastSummary }"},"Forecast.HourlyForecastDetail":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : String.String, precipIntensity : Basics.Float, precipProbability : Basics.Float, temperature : Basics.Float, windSpeed : Basics.Float, windGust : Basics.Float, windBearing : Forecast.BearingDirection }"},"Forecast.HourlyForecastSummary":{"args":[],"type":"{ summary : String.String, icon : String.String, data : List.List Forecast.HourlyForecastDetail }"}},"unions":{"Main.Msg":{"args":[],"tags":{"Increment":[],"Decrement":[],"GotForecastSummary":["Result.Result Http.Error Forecast.ForecastSummary"]}},"Forecast.BearingDirection":{"args":[],"tags":{"North":[],"NorthEast":[],"East":[],"SouthEast":[],"South":[],"SouthWest":[],"West":[],"NorthWest":[]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"List.List":{"args":["a"],"tags":{}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}}}}})}});}(this));
+	elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.0"},"types":{"message":"Main.Msg","aliases":{"Forecast.CurrentForecastSummary":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : Forecast.WeatherIcon, precipProbability : Basics.Float, temperature : Basics.Float, windSpeed : Basics.Float }"},"Forecast.DailyForecastDetail":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : Forecast.WeatherIcon, sunriseTime : Time.Posix, sunsetTime : Time.Posix, precipIntensity : Basics.Float, precipProbability : Basics.Float, precipType : String.String, temperatureHigh : Basics.Float, temperatureHighTime : Time.Posix, temperatureLow : Basics.Float, temperatureLowTime : Time.Posix, windSpeed : Basics.Float, windGust : Basics.Float, windBearing : Forecast.BearingDirection }"},"Forecast.DailyForecastSummary":{"args":[],"type":"{ summary : String.String, icon : Forecast.WeatherIcon, data : List.List Forecast.DailyForecastDetail }"},"Forecast.ForecastSummary":{"args":[],"type":"{ latitude : Basics.Float, longitude : Basics.Float, timezone : String.String, currentForecastSummary : Forecast.CurrentForecastSummary, hourlyForecastSummary : Forecast.HourlyForecastSummary, dailyForecastSummary : Forecast.DailyForecastSummary }"},"Forecast.HourlyForecastDetail":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : Forecast.WeatherIcon, precipIntensity : Basics.Float, precipProbability : Basics.Float, temperature : Basics.Float, windSpeed : Basics.Float, windGust : Basics.Float, windBearing : Forecast.BearingDirection }"},"Forecast.HourlyForecastSummary":{"args":[],"type":"{ summary : String.String, icon : Forecast.WeatherIcon, data : List.List Forecast.HourlyForecastDetail }"}},"unions":{"Main.Msg":{"args":[],"tags":{"GotForecastSummary":["Result.Result Http.Error Forecast.ForecastSummary"]}},"Forecast.BearingDirection":{"args":[],"tags":{"North":[],"NorthEast":[],"East":[],"SouthEast":[],"South":[],"SouthWest":[],"West":[],"NorthWest":[]}},"Forecast.WeatherIcon":{"args":[],"tags":{"ClearDay":[],"ClearNight":[],"Rain":[],"Snow":[],"Sleet":[],"Wind":[],"Fog":[],"Cloudy":[],"PartlyCloudyDay":[],"PartlyCloudyNight":[]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"List.List":{"args":["a"],"tags":{}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}}}}})}});}(this));

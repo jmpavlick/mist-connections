@@ -91,6 +91,5 @@ ENV/
 # Vim swap files
 *.sw*
 
-# Elm object files
-*.elmi
-*.elmo
+# Elm stuff
+elm-ui/elm-stuff/
