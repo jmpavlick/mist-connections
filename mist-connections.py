@@ -12,8 +12,8 @@ def home():
 class Forecast(Resource):
     def get(self):
         latitude = request.args.get('latitude')
-        longtitude = request.args.get('longtitude')
-        uri = "https://api.darksky.net/forecast/bacc57dc0842ea7a771f2dd4e337e87e/" + latitude + "," + longtitude + "?exclude=currently,minutely,alerts,flags"
+        longitude = request.args.get('longitude')
+        uri = "https://api.darksky.net/forecast/bacc57dc0842ea7a771f2dd4e337e87e/" + latitude + "," + longitude + "?exclude=currently,minutely,alerts,flags"
         response = requests.get(url = uri)
         return response.json()
 

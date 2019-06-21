@@ -1,7 +1,7 @@
 module Forecast exposing (BearingDirection(..), DailyForecastDetail, DailyForecastSummary, ForecastSummary, HourlyForecastDetail, HourlyForecastSummary, Location, bearingDirectionDecoder, dailyForecastDetailDecoder, dailyForecastSummaryDecoder, forecastSummaryDecoder, hourlyForecastDetailDecoder, hourlyForecastSummaryDecoder, unixTimeDecoder)
 
 import Json.Decode as Decode exposing (Decoder, andThen, float, int, list, string)
-import Json.Decode.Pipeline as Pipeline exposing (required)
+import Json.Decode.Pipeline as Pipeline exposing (optional, required)
 import Time exposing (Posix)
 
 
@@ -179,8 +179,8 @@ dailyForecastDetailDecoder =
         |> required "sunriseTime" unixTimeDecoder
         |> required "sunsetTime" unixTimeDecoder
         |> required "precipIntensity" float
-        |> required "precipProbability" float
-        |> required "precipType" string
+        |> optional "precipProbability" float 0
+        |> optional "precipType" string ""
         |> required "temperatureHigh" float
         |> required "temperatureHighTime" unixTimeDecoder
         |> required "temperatureLow" float
