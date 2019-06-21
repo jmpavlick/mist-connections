@@ -2489,6 +2489,52 @@ function _Http_track(router, xhr, tracker)
 }
 
 
+function _Time_now(millisToPosix)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(millisToPosix(Date.now())));
+	});
+}
+
+var _Time_setInterval = F2(function(interval, task)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var id = setInterval(function() { _Scheduler_rawSpawn(task); }, interval);
+		return function() { clearInterval(id); };
+	});
+});
+
+function _Time_here()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(
+			A2(elm$time$Time$customZone, -(new Date().getTimezoneOffset()), _List_Nil)
+		));
+	});
+}
+
+
+function _Time_getZoneName()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		try
+		{
+			var name = elm$time$Time$Name(Intl.DateTimeFormat().resolvedOptions().timeZone);
+		}
+		catch (e)
+		{
+			var name = elm$time$Time$Offset(new Date().getTimezoneOffset());
+		}
+		callback(_Scheduler_succeed(name));
+	});
+}
+
+
+
 
 // HELPERS
 
@@ -5045,6 +5091,9 @@ function _Browser_load(url)
 		}
 	}));
 }
+var author$project$Main$Here = function (a) {
+	return {$: 'Here', a: a};
+};
 var elm$core$Basics$apR = F2(
 	function (x, f) {
 		return f(x);
@@ -6893,18 +6942,94 @@ var author$project$Main$getForecastSummary = function (location) {
 var elm$core$Basics$negate = function (n) {
 	return -n;
 };
+var elm$time$Time$Zone = F2(
+	function (a, b) {
+		return {$: 'Zone', a: a, b: b};
+	});
+var elm$time$Time$utc = A2(elm$time$Time$Zone, 0, _List_Nil);
 var author$project$Main$initialModel = {
 	errorData: _List_Nil,
 	forecastSummary: elm$core$Maybe$Nothing,
-	location: {latitude: 37, longitude: -122}
+	location: {latitude: 42, longitude: -83},
+	zone: elm$time$Time$utc
 };
+var elm$core$Platform$Cmd$batch = _Platform_batch;
+var elm$core$Task$map = F2(
+	function (func, taskA) {
+		return A2(
+			elm$core$Task$andThen,
+			function (a) {
+				return elm$core$Task$succeed(
+					func(a));
+			},
+			taskA);
+	});
+var elm$core$Task$Perform = function (a) {
+	return {$: 'Perform', a: a};
+};
+var elm$core$Task$init = elm$core$Task$succeed(_Utils_Tuple0);
+var elm$core$Task$spawnCmd = F2(
+	function (router, _n0) {
+		var task = _n0.a;
+		return _Scheduler_spawn(
+			A2(
+				elm$core$Task$andThen,
+				elm$core$Platform$sendToApp(router),
+				task));
+	});
+var elm$core$Task$onEffects = F3(
+	function (router, commands, state) {
+		return A2(
+			elm$core$Task$map,
+			function (_n0) {
+				return _Utils_Tuple0;
+			},
+			elm$core$Task$sequence(
+				A2(
+					elm$core$List$map,
+					elm$core$Task$spawnCmd(router),
+					commands)));
+	});
+var elm$core$Task$onSelfMsg = F3(
+	function (_n0, _n1, _n2) {
+		return elm$core$Task$succeed(_Utils_Tuple0);
+	});
+var elm$core$Task$cmdMap = F2(
+	function (tagger, _n0) {
+		var task = _n0.a;
+		return elm$core$Task$Perform(
+			A2(elm$core$Task$map, tagger, task));
+	});
+_Platform_effectManagers['Task'] = _Platform_createManager(elm$core$Task$init, elm$core$Task$onEffects, elm$core$Task$onSelfMsg, elm$core$Task$cmdMap);
+var elm$core$Task$command = _Platform_leaf('Task');
+var elm$core$Task$perform = F2(
+	function (toMessage, task) {
+		return elm$core$Task$command(
+			elm$core$Task$Perform(
+				A2(elm$core$Task$map, toMessage, task)));
+	});
+var elm$time$Time$Name = function (a) {
+	return {$: 'Name', a: a};
+};
+var elm$time$Time$Offset = function (a) {
+	return {$: 'Offset', a: a};
+};
+var elm$time$Time$customZone = elm$time$Time$Zone;
+var elm$time$Time$here = _Time_here(_Utils_Tuple0);
 var author$project$Main$init = function (_n0) {
 	return _Utils_Tuple2(
 		author$project$Main$initialModel,
-		author$project$Main$getForecastSummary(author$project$Main$initialModel.location));
+		elm$core$Platform$Cmd$batch(
+			_List_fromArray(
+				[
+					A2(
+					elm$core$Task$perform,
+					elm$core$Basics$identity,
+					A2(elm$core$Task$map, author$project$Main$Here, elm$time$Time$here)),
+					author$project$Main$getForecastSummary(author$project$Main$initialModel.location)
+				])));
 };
 var elm$core$Debug$log = _Debug_log;
-var elm$core$Platform$Cmd$batch = _Platform_batch;
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Main$update = F2(
 	function (msg, model) {
@@ -6916,20 +7041,29 @@ var author$project$Main$update = F2(
 					errorData: A2(elm$core$List$cons, err, model.errorData)
 				});
 		};
-		var result = msg.a;
-		if (result.$ === 'Err') {
-			var e = result.a;
-			return _Utils_Tuple2(
-				addErrorData(e),
-				elm$core$Platform$Cmd$none);
+		if (msg.$ === 'GotForecastSummary') {
+			var result = msg.a;
+			if (result.$ === 'Err') {
+				var e = result.a;
+				return _Utils_Tuple2(
+					addErrorData(e),
+					elm$core$Platform$Cmd$none);
+			} else {
+				var summary = result.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							forecastSummary: elm$core$Maybe$Just(summary)
+						}),
+					elm$core$Platform$Cmd$none);
+			}
 		} else {
-			var summary = result.a;
+			var here = msg.a;
 			return _Utils_Tuple2(
 				_Utils_update(
 					model,
-					{
-						forecastSummary: elm$core$Maybe$Just(summary)
-					}),
+					{zone: here}),
 				elm$core$Platform$Cmd$none);
 		}
 	});
@@ -7326,6 +7460,25 @@ var author$project$Main$currentForecastSummaryView = function (summary) {
 					]))
 			]));
 };
+var author$project$Main$dailyForecastDetailSummaryView = F2(
+	function (detail, zone) {
+		return A2(
+			elm$html$Html$div,
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$class('row')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					elm$html$Html$div,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('col')
+						]),
+					_List_Nil)
+				]));
+	});
 var author$project$Forecast$weatherIconAsClass = function (icon) {
 	return 'wi wi-' + function () {
 		switch (icon.$) {
@@ -7353,16 +7506,30 @@ var author$project$Forecast$weatherIconAsClass = function (icon) {
 	}();
 };
 var elm$html$Html$i = _VirtualDom_node('i');
-var author$project$Main$weatherIconView = function (icon) {
-	return A2(
-		elm$html$Html$i,
-		_List_fromArray(
-			[
-				elm$html$Html$Attributes$class(
-				author$project$Forecast$weatherIconAsClass(icon))
-			]),
-		_List_Nil);
-};
+var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
+var author$project$Main$weatherIconView = F2(
+	function (icon, padding) {
+		return A2(
+			elm$html$Html$div,
+			_List_fromArray(
+				[
+					A2(elm$html$Html$Attributes$style, 'display', 'inline-block'),
+					elm$html$Html$Attributes$class(
+					'px-' + elm$core$String$fromInt(padding))
+				]),
+			_List_fromArray(
+				[
+					A2(
+					elm$html$Html$i,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class(
+							author$project$Forecast$weatherIconAsClass(icon))
+						]),
+					_List_Nil)
+				]));
+	});
 var elm$core$List$takeReverse = F3(
 	function (n, list, kept) {
 		takeReverse:
@@ -7489,96 +7656,106 @@ var elm$core$List$take = F2(
 	function (n, list) {
 		return A3(elm$core$List$takeFast, 0, n, list);
 	});
-var author$project$Main$dailyForecastSummaryView = function (summary) {
-	return A2(
-		elm$html$Html$div,
-		_List_fromArray(
-			[
-				elm$html$Html$Attributes$class('container-fluid')
-			]),
-		_List_fromArray(
-			[
+var author$project$Main$dailyForecastSummaryView = F2(
+	function (summary, zone) {
+		var next5days = A2(elm$core$List$take, 5, summary.data);
+		var topRow = A2(
+			elm$html$Html$div,
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$class('row')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					elm$html$Html$div,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('col')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$h4,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text('Daily:')
+								])),
+							A2(
+							elm$html$Html$h4,
+							_List_Nil,
+							A2(
+								elm$core$List$map,
+								function (x) {
+									return A2(author$project$Main$weatherIconView, x.icon, 1);
+								},
+								next5days))
+						]))
+				]));
+		return A2(
+			elm$html$Html$div,
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$class('container-fluid')
+				]),
+			A2(
+				elm$core$List$cons,
+				topRow,
 				A2(
-				elm$html$Html$div,
-				_List_fromArray(
-					[
-						elm$html$Html$Attributes$class('row')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						elm$html$Html$div,
-						_List_fromArray(
-							[
-								elm$html$Html$Attributes$class('col')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								elm$html$Html$h4,
-								_List_Nil,
-								_List_fromArray(
-									[
-										elm$html$Html$text('Daily:')
-									])),
-								A2(
-								elm$html$Html$h4,
-								_List_Nil,
-								A2(
-									elm$core$List$map,
-									function (x) {
-										return author$project$Main$weatherIconView(x.icon);
-									},
-									A2(elm$core$List$take, 5, summary.data)))
-							]))
-					]))
-			]));
-};
-var author$project$Main$hourlyForecastSummaryView = function (summary) {
-	return A2(
-		elm$html$Html$div,
-		_List_fromArray(
-			[
-				elm$html$Html$Attributes$class('container-fluid')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				elm$html$Html$div,
-				_List_fromArray(
-					[
-						elm$html$Html$Attributes$class('row')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						elm$html$Html$div,
-						_List_fromArray(
-							[
-								elm$html$Html$Attributes$class('col')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								elm$html$Html$h4,
-								_List_Nil,
-								_List_fromArray(
-									[
-										elm$html$Html$text('Hourly:')
-									])),
-								A2(
-								elm$html$Html$h4,
-								_List_Nil,
-								A2(
-									elm$core$List$map,
-									function (x) {
-										return author$project$Main$weatherIconView(x.icon);
-									},
-									A2(elm$core$List$take, 5, summary.data)))
-							]))
-					]))
-			]));
-};
+					elm$core$List$map,
+					function (x) {
+						return A2(author$project$Main$dailyForecastDetailSummaryView, x, zone);
+					},
+					next5days)));
+	});
+var author$project$Main$hourlyForecastSummaryView = F2(
+	function (summary, zone) {
+		var next5hours = A2(elm$core$List$take, 5, summary.data);
+		return A2(
+			elm$html$Html$div,
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$class('container-fluid')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					elm$html$Html$div,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('row')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$div,
+							_List_fromArray(
+								[
+									elm$html$Html$Attributes$class('col')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									elm$html$Html$h4,
+									_List_Nil,
+									_List_fromArray(
+										[
+											elm$html$Html$text('Hourly:')
+										])),
+									A2(
+									elm$html$Html$h4,
+									_List_Nil,
+									A2(
+										elm$core$List$map,
+										function (x) {
+											return A2(author$project$Main$weatherIconView, x.icon, 1);
+										},
+										next5hours))
+								]))
+						]))
+				]));
+	});
 var elm$html$Html$h1 = _VirtualDom_node('h1');
 var elm$html$Html$h2 = _VirtualDom_node('h2');
 var author$project$Main$view = function (model) {
@@ -7695,7 +7872,7 @@ var author$project$Main$view = function (model) {
 										_List_fromArray(
 											[
 												elm$html$Html$text('Currently: '),
-												author$project$Main$weatherIconView(summary.currentForecastSummary.icon)
+												A2(author$project$Main$weatherIconView, summary.currentForecastSummary.icon, 0)
 											]))
 									]))
 							])),
@@ -7734,7 +7911,7 @@ var author$project$Main$view = function (model) {
 									]),
 								_List_fromArray(
 									[
-										author$project$Main$hourlyForecastSummaryView(summary.hourlyForecastSummary)
+										A2(author$project$Main$hourlyForecastSummaryView, summary.hourlyForecastSummary, model.zone)
 									]))
 							])),
 						A2(
@@ -7753,7 +7930,7 @@ var author$project$Main$view = function (model) {
 									]),
 								_List_fromArray(
 									[
-										author$project$Main$dailyForecastSummaryView(summary.dailyForecastSummary)
+										A2(author$project$Main$dailyForecastSummaryView, summary.dailyForecastSummary, model.zone)
 									]))
 							]))
 					]);
@@ -7778,60 +7955,6 @@ var elm$core$Basics$never = function (_n0) {
 		continue never;
 	}
 };
-var elm$core$Task$Perform = function (a) {
-	return {$: 'Perform', a: a};
-};
-var elm$core$Task$init = elm$core$Task$succeed(_Utils_Tuple0);
-var elm$core$Task$map = F2(
-	function (func, taskA) {
-		return A2(
-			elm$core$Task$andThen,
-			function (a) {
-				return elm$core$Task$succeed(
-					func(a));
-			},
-			taskA);
-	});
-var elm$core$Task$spawnCmd = F2(
-	function (router, _n0) {
-		var task = _n0.a;
-		return _Scheduler_spawn(
-			A2(
-				elm$core$Task$andThen,
-				elm$core$Platform$sendToApp(router),
-				task));
-	});
-var elm$core$Task$onEffects = F3(
-	function (router, commands, state) {
-		return A2(
-			elm$core$Task$map,
-			function (_n0) {
-				return _Utils_Tuple0;
-			},
-			elm$core$Task$sequence(
-				A2(
-					elm$core$List$map,
-					elm$core$Task$spawnCmd(router),
-					commands)));
-	});
-var elm$core$Task$onSelfMsg = F3(
-	function (_n0, _n1, _n2) {
-		return elm$core$Task$succeed(_Utils_Tuple0);
-	});
-var elm$core$Task$cmdMap = F2(
-	function (tagger, _n0) {
-		var task = _n0.a;
-		return elm$core$Task$Perform(
-			A2(elm$core$Task$map, tagger, task));
-	});
-_Platform_effectManagers['Task'] = _Platform_createManager(elm$core$Task$init, elm$core$Task$onEffects, elm$core$Task$onSelfMsg, elm$core$Task$cmdMap);
-var elm$core$Task$command = _Platform_leaf('Task');
-var elm$core$Task$perform = F2(
-	function (toMessage, task) {
-		return elm$core$Task$command(
-			elm$core$Task$Perform(
-				A2(elm$core$Task$map, toMessage, task)));
-	});
 var elm$browser$Debugger$Expando$ArraySeq = {$: 'ArraySeq'};
 var elm$browser$Debugger$Expando$Constructor = F3(
 	function (a, b, c) {
@@ -8020,8 +8143,6 @@ var elm$browser$Debugger$Overlay$viewBadMetadata = function (_n0) {
 var elm$browser$Debugger$Overlay$Cancel = {$: 'Cancel'};
 var elm$browser$Debugger$Overlay$Proceed = {$: 'Proceed'};
 var elm$html$Html$button = _VirtualDom_node('button');
-var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
 var elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -11361,4 +11482,4 @@ var author$project$Main$main = elm$browser$Browser$element(
 		view: author$project$Main$view
 	});
 _Platform_export({'Main':{'init':author$project$Main$main(
-	elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.0"},"types":{"message":"Main.Msg","aliases":{"Forecast.CurrentForecastSummary":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : Forecast.WeatherIcon, precipProbability : Basics.Float, temperature : Basics.Float, windSpeed : Basics.Float }"},"Forecast.DailyForecastDetail":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : Forecast.WeatherIcon, sunriseTime : Time.Posix, sunsetTime : Time.Posix, precipIntensity : Basics.Float, precipProbability : Basics.Float, precipType : String.String, temperatureHigh : Basics.Float, temperatureHighTime : Time.Posix, temperatureLow : Basics.Float, temperatureLowTime : Time.Posix, windSpeed : Basics.Float, windGust : Basics.Float, windBearing : Forecast.BearingDirection }"},"Forecast.DailyForecastSummary":{"args":[],"type":"{ summary : String.String, icon : Forecast.WeatherIcon, data : List.List Forecast.DailyForecastDetail }"},"Forecast.ForecastSummary":{"args":[],"type":"{ latitude : Basics.Float, longitude : Basics.Float, timezone : String.String, currentForecastSummary : Forecast.CurrentForecastSummary, hourlyForecastSummary : Forecast.HourlyForecastSummary, dailyForecastSummary : Forecast.DailyForecastSummary }"},"Forecast.HourlyForecastDetail":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : Forecast.WeatherIcon, precipIntensity : Basics.Float, precipProbability : Basics.Float, temperature : Basics.Float, windSpeed : Basics.Float, windGust : Basics.Float, windBearing : Forecast.BearingDirection }"},"Forecast.HourlyForecastSummary":{"args":[],"type":"{ summary : String.String, icon : Forecast.WeatherIcon, data : List.List Forecast.HourlyForecastDetail }"}},"unions":{"Main.Msg":{"args":[],"tags":{"GotForecastSummary":["Result.Result Http.Error Forecast.ForecastSummary"]}},"Forecast.BearingDirection":{"args":[],"tags":{"North":[],"NorthEast":[],"East":[],"SouthEast":[],"South":[],"SouthWest":[],"West":[],"NorthWest":[]}},"Forecast.WeatherIcon":{"args":[],"tags":{"ClearDay":[],"ClearNight":[],"Rain":[],"Snow":[],"Sleet":[],"Wind":[],"Fog":[],"Cloudy":[],"PartlyCloudyDay":[],"PartlyCloudyNight":[]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"List.List":{"args":["a"],"tags":{}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}}}}})}});}(this));
+	elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.0"},"types":{"message":"Main.Msg","aliases":{"Forecast.CurrentForecastSummary":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : Forecast.WeatherIcon, precipProbability : Basics.Float, temperature : Basics.Float, windSpeed : Basics.Float }"},"Forecast.DailyForecastDetail":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : Forecast.WeatherIcon, sunriseTime : Time.Posix, sunsetTime : Time.Posix, precipIntensity : Basics.Float, precipProbability : Basics.Float, precipType : String.String, temperatureHigh : Basics.Float, temperatureHighTime : Time.Posix, temperatureLow : Basics.Float, temperatureLowTime : Time.Posix, windSpeed : Basics.Float, windGust : Basics.Float, windBearing : Forecast.BearingDirection }"},"Forecast.DailyForecastSummary":{"args":[],"type":"{ summary : String.String, icon : Forecast.WeatherIcon, data : List.List Forecast.DailyForecastDetail }"},"Forecast.ForecastSummary":{"args":[],"type":"{ latitude : Basics.Float, longitude : Basics.Float, timezone : String.String, currentForecastSummary : Forecast.CurrentForecastSummary, hourlyForecastSummary : Forecast.HourlyForecastSummary, dailyForecastSummary : Forecast.DailyForecastSummary }"},"Forecast.HourlyForecastDetail":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : Forecast.WeatherIcon, precipIntensity : Basics.Float, precipProbability : Basics.Float, temperature : Basics.Float, windSpeed : Basics.Float, windGust : Basics.Float, windBearing : Forecast.BearingDirection }"},"Forecast.HourlyForecastSummary":{"args":[],"type":"{ summary : String.String, icon : Forecast.WeatherIcon, data : List.List Forecast.HourlyForecastDetail }"},"Time.Era":{"args":[],"type":"{ start : Basics.Int, offset : Basics.Int }"}},"unions":{"Main.Msg":{"args":[],"tags":{"GotForecastSummary":["Result.Result Http.Error Forecast.ForecastSummary"],"Here":["Time.Zone"]}},"Forecast.BearingDirection":{"args":[],"tags":{"North":[],"NorthEast":[],"East":[],"SouthEast":[],"South":[],"SouthWest":[],"West":[],"NorthWest":[]}},"Forecast.WeatherIcon":{"args":[],"tags":{"ClearDay":[],"ClearNight":[],"Rain":[],"Snow":[],"Sleet":[],"Wind":[],"Fog":[],"Cloudy":[],"PartlyCloudyDay":[],"PartlyCloudyNight":[]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"List.List":{"args":["a"],"tags":{}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Time.Zone":{"args":[],"tags":{"Zone":["Basics.Int","List.List Time.Era"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}}}}})}});}(this));
