@@ -6,6 +6,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http exposing (..)
+import HumanDates exposing (..)
 import Round
 import Task
 import Time exposing (Posix, Zone)
@@ -204,7 +205,15 @@ dailyForecastDetailSummaryView : DailyForecastDetail -> Zone -> Html Msg
 dailyForecastDetailSummaryView detail zone =
     div [ class "row" ]
         [ div [ class "col" ]
-            []
+            [ h5 []
+                [ HumanDates.prettyDay zone detail.time ++ ": " |> text
+                , weatherIconView detail.icon 0
+                ]
+            , ul [ class "list-unstyled" ]
+                [ li [] [ "High: " ++ Round.round 0 detail.temperatureHigh ++ "º F at " ++ prettyHourMinute zone detail.temperatureHighTime |> text ]
+                , li [] [ "Low: " ++ Round.round 0 detail.temperatureLow ++ "º F at " ++ prettyHourMinute zone detail.temperatureLowTime |> text ]
+                ]
+            ]
         ]
 
 

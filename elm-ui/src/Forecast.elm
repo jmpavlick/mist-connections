@@ -1,4 +1,4 @@
-module Forecast exposing (BearingDirection(..), CurrentForecastSummary, DailyForecastDetail, DailyForecastSummary, ForecastSummary, HourlyForecastDetail, HourlyForecastSummary, Location, WeatherIcon(..), bearingDirectionDecoder, currentForecastSummaryDecoder, dailyForecastDetailDecoder, dailyForecastSummaryDecoder, forecastSummaryDecoder, hourlyForecastDetailDecoder, hourlyForecastSummaryDecoder, unixTimeDecoder, weatherIconAsClass, weatherIconDecoder)
+module Forecast exposing (BearingDirection(..), CurrentForecastSummary, DailyForecastDetail, DailyForecastSummary, ForecastSummary, HourlyForecastDetail, HourlyForecastSummary, Location, WeatherIcon(..), bearingDirectionDecoder, bearingDirectionToString, currentForecastSummaryDecoder, dailyForecastDetailDecoder, dailyForecastSummaryDecoder, forecastSummaryDecoder, hourlyForecastDetailDecoder, hourlyForecastSummaryDecoder, unixTimeDecoder, weatherIconAsClass, weatherIconDecoder)
 
 import Json.Decode as Decode exposing (Decoder, andThen, float, int, list, string)
 import Json.Decode.Pipeline as Pipeline exposing (optional, required)
@@ -47,13 +47,41 @@ type alias DailyForecastSummary =
 
 type BearingDirection
     = North
-    | NorthEast
+    | Northeast
     | East
-    | SouthEast
+    | Southeast
     | South
-    | SouthWest
+    | Southwest
     | West
-    | NorthWest
+    | Northwest
+
+
+bearingDirectionToString : BearingDirection -> String
+bearingDirectionToString b =
+    case b of
+        North ->
+            "North"
+
+        Northeast ->
+            "Northeast"
+
+        East ->
+            "East"
+
+        Southeast ->
+            "Southeast"
+
+        South ->
+            "South"
+
+        Southwest ->
+            "Southwest"
+
+        West ->
+            "West"
+
+        Northwest ->
+            "Northwest"
 
 
 type WeatherIcon
@@ -186,25 +214,25 @@ bearingDirectionDecoder =
                     (List.range 339 359 ++ List.range 0 23) |> bearingDirectionMap North
 
                 northEast =
-                    List.range 24 68 |> bearingDirectionMap NorthEast
+                    List.range 24 68 |> bearingDirectionMap Northeast
 
                 east =
                     List.range 69 113 |> bearingDirectionMap East
 
                 southEast =
-                    List.range 114 158 |> bearingDirectionMap SouthEast
+                    List.range 114 158 |> bearingDirectionMap Southeast
 
                 south =
                     List.range 159 203 |> bearingDirectionMap South
 
                 southWest =
-                    List.range 204 248 |> bearingDirectionMap SouthWest
+                    List.range 204 248 |> bearingDirectionMap Southwest
 
                 west =
                     List.range 249 293 |> bearingDirectionMap West
 
                 northWest =
-                    List.range 294 338 |> bearingDirectionMap NorthWest
+                    List.range 294 338 |> bearingDirectionMap Northwest
 
                 allDirections =
                     north
