@@ -41,6 +41,7 @@ initialModel =
     , forecastSummary = Nothing
     , errorData = []
     , zone = Time.utc
+    , applicationView = CurrentForecast
     }
 
 
@@ -51,6 +52,7 @@ initialModel =
 type Msg
     = GotForecastSummary (Result Http.Error ForecastSummary)
     | Here Zone
+    | ChangeApplicationView ApplicationView
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -75,6 +77,9 @@ update msg model =
 
         Here here ->
             ( { model | zone = here }, Cmd.none )
+
+        ChangeApplicationView v ->
+            ( { model | applicationView = v }, Cmd.none )
 
 
 

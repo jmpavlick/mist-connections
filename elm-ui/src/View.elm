@@ -21,14 +21,18 @@ weatherIconView icon padding =
 view : Model -> Html msg
 view model =
     div [ class "container-fluid" ] <|
+        let
+            titleDiv =
+                div [ class "row" ] [ div [ class "col" ] [ h1 [] [ text "Mist Opportunities" ] ] ]
+        in
         case model.forecastSummary of
             Nothing ->
-                [ div [ class "row" ] [ div [ class "col" ] [ h1 [] [ text "Mist Opportunities" ] ] ]
+                [ titleDiv
                 , div [ class "row" ] [ div [ class "col" ] [ h2 [] [ text "Loading..." ] ] ]
                 ]
 
             Just summary ->
-                [ div [ class "row" ] [ div [ class "col" ] [ h1 [] [ text "Mist Opportunities" ] ] ]
+                [ titleDiv
                 , div [ class "row" ]
                     [ div [ class "col" ]
                         [ h2 []
@@ -83,41 +87,44 @@ currentForecastSummaryView summary =
 hourlyForecastSummaryView : HourlyForecastSummary -> Zone -> Html msg
 hourlyForecastSummaryView summary zone =
     let
-        next5hours =
-            List.take 5 summary.data
+        next24hours =
+            List.take 24 summary.data
+
+        next8hours =
+            List.take 8 next24hours
 
         topRow =
             div [ class "row" ]
                 [ div [ class "col" ]
                     [ h4 [] [ text "Hourly:" ]
                     , h4 [] <|
-                        List.map (\x -> weatherIconView x.icon 1) next5hours
+                        List.map (\x -> weatherIconView x.icon 1) next8hours
                     ]
                 ]
     in
     div [ class "container-fluid" ] <|
         topRow
-            :: List.map (\x -> hourlyForecastDetailSummaryView x zone) next5hours
+            :: List.map (\x -> hourlyForecastDetailSummaryView x zone) next24hours
 
 
 dailyForecastSummaryView : DailyForecastSummary -> Zone -> Html msg
 dailyForecastSummaryView summary zone =
     let
-        next5days =
-            List.take 5 summary.data
+        next8days =
+            List.take 8 summary.data
 
         topRow =
             div [ class "row" ]
                 [ div [ class "col" ]
                     [ h4 [] [ text "Daily:" ]
                     , h4 [] <|
-                        List.map (\x -> weatherIconView x.icon 1) next5days
+                        List.map (\x -> weatherIconView x.icon 1) next8days
                     ]
                 ]
     in
     div [ class "container-fluid" ] <|
         topRow
-            :: List.map (\x -> dailyForecastDetailSummaryView x zone) next5days
+            :: List.map (\x -> dailyForecastDetailSummaryView x zone) next8days
 
 
 hourlyForecastDetailSummaryView : HourlyForecastDetail -> Zone -> Html msg

@@ -1,4 +1,4 @@
-module Model exposing (Model)
+module Model exposing (ApplicationView(..), Model)
 
 import Forecast exposing (ForecastSummary, Location)
 import Http
@@ -10,4 +10,11 @@ type alias Model =
     , forecastSummary : Maybe ForecastSummary
     , errorData : List Http.Error
     , zone : Zone
+    , applicationView : ApplicationView
     }
+
+
+type ApplicationView
+    = CurrentForecast
+    | HourlyForecastSummaries
+    | DailyForecastSummaries
