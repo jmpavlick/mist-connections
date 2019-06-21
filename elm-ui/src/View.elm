@@ -1,10 +1,12 @@
-module View exposing (currentForecastSummaryView, dailyForecastDetailDetailView, dailyForecastDetailSummaryView, dailyForecastSummaryView, hourlyForecastDetailDetailView, hourlyForecastDetailSummaryView, hourlyForecastSummaryView, view, weatherIconView)
+module View exposing (view)
 
 import Forecast exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
 import HumanDates exposing (..)
 import Model exposing (..)
+import Msg exposing (..)
 import Round
 import Time exposing (Posix, Zone)
 
@@ -13,14 +15,14 @@ import Time exposing (Posix, Zone)
 -- VIEW
 
 
-weatherIconView : WeatherIcon -> Int -> Html msg
+weatherIconView : WeatherIcon -> Int -> Html Msg
 weatherIconView icon padding =
     div [ "d-inline-block px-" ++ String.fromInt padding |> class ] [ i [ weatherIconAsClass icon |> class ] [] ]
 
 
-view : Model -> Html msg
+view : Model -> Html Msg
 view model =
-    div [ class "container-fluid" ] <|
+    div [ class "container" ] <|
         let
             titleDiv =
                 div [ class "row" ] [ div [ class "col" ] [ h1 [] [ text "Mist Opportunities" ] ] ]
@@ -35,27 +37,71 @@ view model =
                 [ titleDiv
                 , div [ class "row" ]
                     [ div [ class "col" ]
-                        [ h2 []
-                            [ text "Currently: "
-                            , weatherIconView summary.currentForecastSummary.icon 0
-                            ]
+                        [ case model.applicationView of
+                            CurrentForecast ->
+                                currentForecastView summary model.zone
+
+                            HourlyForecasts ->
+                                div [ class "row" ] []
+
+                            DailyForecasts ->
+                                div [ class "row" ] []
                         ]
                     ]
-                , div [ class "row" ] [ div [ class "col" ] [ currentForecastSummaryView summary.currentForecastSummary ] ]
-                , div [ class "row" ] [ div [ class "col" ] [ hourlyForecastSummaryView summary.hourlyForecastSummary model.zone ] ]
-                , div [ class "row" ] [ div [ class "col" ] [ dailyForecastSummaryView summary.dailyForecastSummary model.zone ] ]
                 ]
 
 
-currentForecastSummaryView : CurrentForecastSummary -> Html msg
-currentForecastSummaryView summary =
+currentForecastView : ForecastSummary -> Zone -> Html Msg
+currentForecastView forecastSummary zone =
+    let
+        current =
+            forecastSummary.currentForecastSummary
+
+        getIcons forecasts =
+            List.take 8 forecasts.data
+                |> List.map (\x -> x.icon)
+                |> List.map (\x -> weatherIconView x 1)
+                |> h4 []
+
+        dailyIcons =
+            getIcons forecastSummary.dailyForecastSummary
+
+        hourlyIcons =
+            getIcons forecastSummary.hourlyForecastSummary
+
+        iconCard : String -> Html Msg -> ApplicationView -> Html Msg
+        iconCard label icons appView =
+            div [ class "row" ]
+                [ div [ class "col" ]
+                    [ div
+                        [ class "card my-2"
+                        , style "width" "24rem"
+                        , style "cursor" "pointer"
+                        , ChangeApplicationView appView |> onClick
+                        ]
+                        [ div [ class "card-body" ]
+                            [ h4 [] [ label ++ ":" |> text ]
+                            , icons
+                            ]
+                        ]
+                    ]
+                ]
+    in
     div [ class "container-fluid" ]
         [ div [ class "row" ]
             [ div [ class "col" ]
+                [ h2 []
+                    [ text "Currently: "
+                    , weatherIconView current.icon 0
+                    ]
+                ]
+            ]
+        , div [ class "row" ]
+            [ div [ class "col" ]
                 [ h3 []
-                    [ summary.summary
+                    [ current.summary
                         ++ ". It's "
-                        ++ Round.round 0 summary.temperature
+                        ++ Round.round 0 current.temperature
                         ++ "º outside."
                         |> text
                     ]
@@ -66,7 +112,7 @@ currentForecastSummaryView summary =
                 [ h4 []
                     [ let
                         precipProbabilityFragment =
-                            case Round.round 0 summary.precipProbability of
+                            case Round.round 0 current.precipProbability of
                                 "0" ->
                                     "Right now, "
 
@@ -75,16 +121,18 @@ currentForecastSummaryView summary =
                       in
                       precipProbabilityFragment
                         ++ "the wind is blowing at "
-                        ++ Round.round 0 summary.windSpeed
+                        ++ Round.round 0 current.windSpeed
                         ++ " MPH."
                         |> text
                     ]
                 ]
             ]
+        , iconCard "Hourly" hourlyIcons HourlyForecasts
+        , iconCard "Daily" dailyIcons DailyForecasts
         ]
 
 
-hourlyForecastSummaryView : HourlyForecastSummary -> Zone -> Html msg
+hourlyForecastSummaryView : HourlyForecastSummary -> Zone -> Html Msg
 hourlyForecastSummaryView summary zone =
     let
         next24hours =
@@ -107,7 +155,7 @@ hourlyForecastSummaryView summary zone =
             :: List.map (\x -> hourlyForecastDetailSummaryView x zone) next24hours
 
 
-dailyForecastSummaryView : DailyForecastSummary -> Zone -> Html msg
+dailyForecastSummaryView : DailyForecastSummary -> Zone -> Html Msg
 dailyForecastSummaryView summary zone =
     let
         next8days =
@@ -127,7 +175,7 @@ dailyForecastSummaryView summary zone =
             :: List.map (\x -> dailyForecastDetailSummaryView x zone) next8days
 
 
-hourlyForecastDetailSummaryView : HourlyForecastDetail -> Zone -> Html msg
+hourlyForecastDetailSummaryView : HourlyForecastDetail -> Zone -> Html Msg
 hourlyForecastDetailSummaryView detail zone =
     div [ class "row" ]
         [ div [ class "col" ]
@@ -146,7 +194,7 @@ hourlyForecastDetailSummaryView detail zone =
         ]
 
 
-dailyForecastDetailSummaryView : DailyForecastDetail -> Zone -> Html msg
+dailyForecastDetailSummaryView : DailyForecastDetail -> Zone -> Html Msg
 dailyForecastDetailSummaryView detail zone =
     div [ class "row" ]
         [ div [ class "col" ]
@@ -159,7 +207,7 @@ dailyForecastDetailSummaryView detail zone =
         ]
 
 
-hourlyForecastDetailDetailView : HourlyForecastDetail -> Zone -> Html msg
+hourlyForecastDetailDetailView : HourlyForecastDetail -> Zone -> Html Msg
 hourlyForecastDetailDetailView detail zone =
     div []
         [ p [] [ detail.summary ++ "." |> text ]
@@ -176,7 +224,7 @@ hourlyForecastDetailDetailView detail zone =
         ]
 
 
-dailyForecastDetailDetailView : DailyForecastDetail -> Zone -> Html msg
+dailyForecastDetailDetailView : DailyForecastDetail -> Zone -> Html Msg
 dailyForecastDetailDetailView detail zone =
     div []
         [ p [] [ text detail.summary ]

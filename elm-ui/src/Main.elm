@@ -1,9 +1,10 @@
-module Main exposing (Msg(..), main, update)
+module Main exposing (main, update)
 
 import Browser
 import Forecast exposing (..)
 import Http exposing (..)
 import Model exposing (..)
+import Msg exposing (..)
 import Task
 import Time exposing (Posix, Zone)
 import View exposing (..)
@@ -46,13 +47,7 @@ initialModel =
 
 
 
--- MSG, UPDATE
-
-
-type Msg
-    = GotForecastSummary (Result Http.Error ForecastSummary)
-    | Here Zone
-    | ChangeApplicationView ApplicationView
+-- UPDATE
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
