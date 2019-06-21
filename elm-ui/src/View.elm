@@ -85,16 +85,19 @@ hourlyForecastSummaryView summary zone =
     let
         next5hours =
             List.take 5 summary.data
-    in
-    div [ class "container-fluid" ]
-        [ div [ class "row" ]
-            [ div [ class "col" ]
-                [ h4 [] [ text "Hourly:" ]
-                , h4 [] <|
-                    List.map (\x -> weatherIconView x.icon 1) next5hours
+
+        topRow =
+            div [ class "row" ]
+                [ div [ class "col" ]
+                    [ h4 [] [ text "Hourly:" ]
+                    , h4 [] <|
+                        List.map (\x -> weatherIconView x.icon 1) next5hours
+                    ]
                 ]
-            ]
-        ]
+    in
+    div [ class "container-fluid" ] <|
+        topRow
+            :: List.map (\x -> hourlyForecastDetailSummaryView x zone) next5hours
 
 
 dailyForecastSummaryView : DailyForecastSummary -> Zone -> Html msg
@@ -119,7 +122,19 @@ dailyForecastSummaryView summary zone =
 
 hourlyForecastDetailSummaryView : HourlyForecastDetail -> Zone -> Html msg
 hourlyForecastDetailSummaryView detail zone =
-    div [] []
+    div [ class "row" ]
+        [ div [ class "col" ]
+            [ h5 []
+                [ HumanDates.prettyHourMinute zone detail.time
+                    ++ ": "
+                    ++ Round.round 0 detail.temperature
+                    ++ "º F, "
+                    |> text
+                , weatherIconView detail.icon 0
+                ]
+            , p [] [ detail.summary ++ "." |> text ]
+            ]
+        ]
 
 
 dailyForecastDetailSummaryView : DailyForecastDetail -> Zone -> Html msg

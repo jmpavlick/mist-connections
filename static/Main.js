@@ -8099,14 +8099,13 @@ var author$project$View$dailyForecastSummaryView = F2(
 					},
 					next5days)));
 	});
-var author$project$View$hourlyForecastSummaryView = F2(
-	function (summary, zone) {
-		var next5hours = A2(elm$core$List$take, 5, summary.data);
+var author$project$View$hourlyForecastDetailSummaryView = F2(
+	function (detail, zone) {
 		return A2(
 			elm$html$Html$div,
 			_List_fromArray(
 				[
-					elm$html$Html$Attributes$class('container-fluid')
+					elm$html$Html$Attributes$class('row')
 				]),
 			_List_fromArray(
 				[
@@ -8114,37 +8113,81 @@ var author$project$View$hourlyForecastSummaryView = F2(
 					elm$html$Html$div,
 					_List_fromArray(
 						[
-							elm$html$Html$Attributes$class('row')
+							elm$html$Html$Attributes$class('col')
 						]),
 					_List_fromArray(
 						[
 							A2(
-							elm$html$Html$div,
+							elm$html$Html$h5,
+							_List_Nil,
 							_List_fromArray(
 								[
-									elm$html$Html$Attributes$class('col')
-								]),
+									elm$html$Html$text(
+									A2(author$project$HumanDates$prettyHourMinute, zone, detail.time) + (': ' + (A2(myrho$elm_round$Round$round, 0, detail.temperature) + 'º F, '))),
+									A2(author$project$View$weatherIconView, detail.icon, 0)
+								])),
+							A2(
+							elm$html$Html$p,
+							_List_Nil,
 							_List_fromArray(
 								[
-									A2(
-									elm$html$Html$h4,
-									_List_Nil,
-									_List_fromArray(
-										[
-											elm$html$Html$text('Hourly:')
-										])),
-									A2(
-									elm$html$Html$h4,
-									_List_Nil,
-									A2(
-										elm$core$List$map,
-										function (x) {
-											return A2(author$project$View$weatherIconView, x.icon, 1);
-										},
-										next5hours))
+									elm$html$Html$text(detail.summary + '.')
 								]))
 						]))
 				]));
+	});
+var author$project$View$hourlyForecastSummaryView = F2(
+	function (summary, zone) {
+		var next5hours = A2(elm$core$List$take, 5, summary.data);
+		var topRow = A2(
+			elm$html$Html$div,
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$class('row')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					elm$html$Html$div,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('col')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$h4,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text('Hourly:')
+								])),
+							A2(
+							elm$html$Html$h4,
+							_List_Nil,
+							A2(
+								elm$core$List$map,
+								function (x) {
+									return A2(author$project$View$weatherIconView, x.icon, 1);
+								},
+								next5hours))
+						]))
+				]));
+		return A2(
+			elm$html$Html$div,
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$class('container-fluid')
+				]),
+			A2(
+				elm$core$List$cons,
+				topRow,
+				A2(
+					elm$core$List$map,
+					function (x) {
+						return A2(author$project$View$hourlyForecastDetailSummaryView, x, zone);
+					},
+					next5hours)));
 	});
 var elm$html$Html$h1 = _VirtualDom_node('h1');
 var elm$html$Html$h2 = _VirtualDom_node('h2');
