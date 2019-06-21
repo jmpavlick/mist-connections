@@ -103,6 +103,8 @@ view model =
                         ]
                     ]
                 , div [ class "row" ] [ div [ class "col" ] [ currentForecastSummaryView summary.currentForecastSummary ] ]
+                , div [ class "row" ] [ div [ class "col" ] [ hourlyForecastSummaryView summary.hourlyForecastSummary ] ]
+                , div [ class "row" ] [ div [ class "col" ] [ dailyForecastSummaryView summary.dailyForecastSummary ] ]
                 ]
 
 
@@ -138,6 +140,32 @@ currentForecastSummaryView summary =
                         ++ " MPH."
                         |> text
                     ]
+                ]
+            ]
+        ]
+
+
+hourlyForecastSummaryView : HourlyForecastSummary -> Html Msg
+hourlyForecastSummaryView summary =
+    div [ class "container-fluid" ]
+        [ div [ class "row" ]
+            [ div [ class "col" ]
+                [ h4 [] [ text "Hourly:" ]
+                , h4 [] <|
+                    List.map (\x -> weatherIconView x.icon) (List.take 5 summary.data)
+                ]
+            ]
+        ]
+
+
+dailyForecastSummaryView : DailyForecastSummary -> Html Msg
+dailyForecastSummaryView summary =
+    div [ class "container-fluid" ]
+        [ div [ class "row" ]
+            [ div [ class "col" ]
+                [ h4 [] [ text "Daily:" ]
+                , h4 [] <|
+                    List.map (\x -> weatherIconView x.icon) (List.take 5 summary.data)
                 ]
             ]
         ]
