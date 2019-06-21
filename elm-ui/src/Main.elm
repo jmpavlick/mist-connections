@@ -19,12 +19,23 @@ main =
         }
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
-    ( initialModel
+type alias Flags =
+    { latitude : Float
+    , longitude : Float
+    }
+
+
+init : Flags -> ( Model, Cmd Msg )
+init flags =
+    let
+        model =
+            Location flags.latitude flags.longitude
+                |> initialModel
+    in
+    ( model
     , Cmd.batch
         [ Task.map Here Time.here |> Task.perform identity
-        , getForecastSummary initialModel.location
+        , getForecastSummary model.location
         ]
     )
 
@@ -33,12 +44,9 @@ init _ =
 -- TYPES
 
 
-initialModel : Model
-initialModel =
-    { location =
-        { latitude = 42
-        , longitude = -83
-        }
+initialModel : Location -> Model
+initialModel location =
+    { location = location
     , forecastSummary = Nothing
     , errorData = []
     , zone = Time.utc
