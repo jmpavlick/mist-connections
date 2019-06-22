@@ -1,6 +1,6 @@
 module Forecast exposing (BearingDirection(..), CurrentForecastSummary, DailyForecastDetail, DailyForecastSummary, ForecastSummary, HourlyForecastDetail, HourlyForecastSummary, Location, WeatherIcon(..), bearingDirectionDecoder, bearingDirectionToString, currentForecastSummaryDecoder, dailyForecastDetailDecoder, dailyForecastSummaryDecoder, forecastSummaryDecoder, hourlyForecastDetailDecoder, hourlyForecastSummaryDecoder, unixTimeDecoder, weatherIconAsClass, weatherIconDecoder)
 
-import Json.Decode as Decode exposing (Decoder, andThen, float, int, list, string)
+import Json.Decode as Decode exposing (Decoder, andThen, bool, float, int, list, string)
 import Json.Decode.Pipeline as Pipeline exposing (optional, required)
 import Time exposing (Posix)
 
@@ -144,6 +144,7 @@ type alias HourlyForecastDetail =
     , windSpeed : Float
     , windGust : Float
     , windBearing : BearingDirection
+    , detailSelected : Bool
     }
 
 
@@ -163,6 +164,7 @@ type alias DailyForecastDetail =
     , windSpeed : Float
     , windGust : Float
     , windBearing : BearingDirection
+    , detailSelected : Bool
     }
 
 
@@ -289,6 +291,7 @@ dailyForecastDetailDecoder =
         |> required "windSpeed" float
         |> required "windGust" float
         |> required "windBearing" bearingDirectionDecoder
+        |> optional "detailSelected" bool False
 
 
 hourlyForecastDetailDecoder : Decoder HourlyForecastDetail
@@ -304,6 +307,7 @@ hourlyForecastDetailDecoder =
         |> required "windSpeed" float
         |> required "windGust" float
         |> required "windBearing" bearingDirectionDecoder
+        |> optional "detailSelected" bool False
 
 
 hourlyForecastSummaryDecoder : Decoder HourlyForecastSummary

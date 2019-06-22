@@ -25,7 +25,7 @@ view model =
     div [ class "container" ] <|
         let
             titleDiv =
-                div [ class "row" ] [ div [ class "col" ] [ h1 [] [ text "Mist Opportunities" ] ] ]
+                div [ class "row", ChangeApplicationView CurrentForecast |> onClick ] [ div [ class "col" ] [ h1 [] [ text "Mist Opportunities" ] ] ]
         in
         case model.forecastSummary of
             Nothing ->
@@ -42,10 +42,10 @@ view model =
                                 currentForecastView summary model.zone
 
                             HourlyForecasts ->
-                                div [ class "row" ] []
+                                hourlyForecastView summary.hourlyForecastSummary model.zone
 
                             DailyForecasts ->
-                                div [ class "row" ] []
+                                dailyForecastView summary.dailyForecastSummary model.zone
                         ]
                     ]
                 ]
@@ -132,21 +132,16 @@ currentForecastView forecastSummary zone =
         ]
 
 
-hourlyForecastSummaryView : HourlyForecastSummary -> Zone -> Html Msg
-hourlyForecastSummaryView summary zone =
+hourlyForecastView : HourlyForecastSummary -> Zone -> Html Msg
+hourlyForecastView summary zone =
     let
         next24hours =
             List.take 24 summary.data
 
-        next8hours =
-            List.take 8 next24hours
-
         topRow =
             div [ class "row" ]
                 [ div [ class "col" ]
-                    [ h4 [] [ text "Hourly:" ]
-                    , h4 [] <|
-                        List.map (\x -> weatherIconView x.icon 1) next8hours
+                    [ h4 [] [ text "Hourly" ]
                     ]
                 ]
     in
@@ -155,8 +150,8 @@ hourlyForecastSummaryView summary zone =
             :: List.map (\x -> hourlyForecastDetailSummaryView x zone) next24hours
 
 
-dailyForecastSummaryView : DailyForecastSummary -> Zone -> Html Msg
-dailyForecastSummaryView summary zone =
+dailyForecastView : DailyForecastSummary -> Zone -> Html Msg
+dailyForecastView summary zone =
     let
         next8days =
             List.take 8 summary.data
@@ -164,9 +159,7 @@ dailyForecastSummaryView summary zone =
         topRow =
             div [ class "row" ]
                 [ div [ class "col" ]
-                    [ h4 [] [ text "Daily:" ]
-                    , h4 [] <|
-                        List.map (\x -> weatherIconView x.icon 1) next8days
+                    [ h4 [] [ text "Daily" ]
                     ]
                 ]
     in
@@ -178,7 +171,11 @@ dailyForecastSummaryView summary zone =
 hourlyForecastDetailSummaryView : HourlyForecastDetail -> Zone -> Html Msg
 hourlyForecastDetailSummaryView detail zone =
     div [ class "row" ]
-        [ div [ class "col" ]
+        [ div
+            [ class "col"
+            , SelectHourlyForecastDetail detail |> onClick
+            , style "cursor" "pointer"
+            ]
             [ h5 []
                 [ HumanDates.prettyHourMinute zone detail.time
                     ++ ": "
@@ -209,7 +206,15 @@ dailyForecastDetailSummaryView detail zone =
 
 hourlyForecastDetailDetailView : HourlyForecastDetail -> Zone -> Html Msg
 hourlyForecastDetailDetailView detail zone =
-    div []
+    div
+        [ class <|
+            case detail.detailSelected of
+                True ->
+                    ""
+
+                False ->
+                    "d-none"
+        ]
         [ p [] [ detail.summary ++ "." |> text ]
         , ul [ class "list-unstyled" ]
             [ li []

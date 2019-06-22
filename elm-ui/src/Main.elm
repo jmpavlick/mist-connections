@@ -84,6 +84,42 @@ update msg model =
         ChangeApplicationView v ->
             ( { model | applicationView = v }, Cmd.none )
 
+        SelectHourlyForecastDetail detail ->
+            let
+                updatedModel =
+                    case model.forecastSummary of
+                        Nothing ->
+                            model
+
+                        Just summary ->
+                            let
+                                hfd =
+                                    summary.hourlyForecastSummary.data
+
+                                hfs =
+                                    summary.hourlyForecastSummary
+
+                                updatedHfd =
+                                    List.map
+                                        (\x ->
+                                            if x.time == detail.time then
+                                                { x | detailSelected = True }
+
+                                            else
+                                                { x | detailSelected = False }
+                                        )
+                                        hfd
+
+                                updatedHfs =
+                                    { hfs | data = updatedHfd }
+
+                                updatedSummary =
+                                    { summary | hourlyForecastSummary = updatedHfs }
+                            in
+                            { model | forecastSummary = Just updatedSummary }
+            in
+            ( updatedModel, Cmd.none )
+
 
 
 -- REST

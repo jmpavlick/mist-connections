@@ -5742,7 +5742,9 @@ var author$project$Forecast$DailyForecastDetail = function (time) {
 												return function (windSpeed) {
 													return function (windGust) {
 														return function (windBearing) {
-															return {icon: icon, precipIntensity: precipIntensity, precipProbability: precipProbability, precipType: precipType, summary: summary, sunriseTime: sunriseTime, sunsetTime: sunsetTime, temperatureHigh: temperatureHigh, temperatureHighTime: temperatureHighTime, temperatureLow: temperatureLow, temperatureLowTime: temperatureLowTime, time: time, windBearing: windBearing, windGust: windGust, windSpeed: windSpeed};
+															return function (detailSelected) {
+																return {detailSelected: detailSelected, icon: icon, precipIntensity: precipIntensity, precipProbability: precipProbability, precipType: precipType, summary: summary, sunriseTime: sunriseTime, sunsetTime: sunsetTime, temperatureHigh: temperatureHigh, temperatureHighTime: temperatureHighTime, temperatureLow: temperatureLow, temperatureLowTime: temperatureLowTime, time: time, windBearing: windBearing, windGust: windGust, windSpeed: windSpeed};
+															};
 														};
 													};
 												};
@@ -5956,69 +5958,75 @@ var author$project$Forecast$millimetersAsInchesDecoder = A2(
 		return elm$json$Json$Decode$succeed(x * 3.93701e-2);
 	},
 	elm$json$Json$Decode$float);
-var author$project$Forecast$dailyForecastDetailDecoder = A3(
-	NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-	'windBearing',
-	author$project$Forecast$bearingDirectionDecoder,
+var elm$json$Json$Decode$bool = _Json_decodeBool;
+var author$project$Forecast$dailyForecastDetailDecoder = A4(
+	NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+	'detailSelected',
+	elm$json$Json$Decode$bool,
+	false,
 	A3(
 		NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-		'windGust',
-		elm$json$Json$Decode$float,
+		'windBearing',
+		author$project$Forecast$bearingDirectionDecoder,
 		A3(
 			NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-			'windSpeed',
+			'windGust',
 			elm$json$Json$Decode$float,
 			A3(
 				NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-				'temperatureLowTime',
-				author$project$Forecast$unixTimeDecoder,
+				'windSpeed',
+				elm$json$Json$Decode$float,
 				A3(
 					NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-					'temperatureLow',
-					elm$json$Json$Decode$float,
+					'temperatureLowTime',
+					author$project$Forecast$unixTimeDecoder,
 					A3(
 						NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-						'temperatureHighTime',
-						author$project$Forecast$unixTimeDecoder,
+						'temperatureLow',
+						elm$json$Json$Decode$float,
 						A3(
 							NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-							'temperatureHigh',
-							elm$json$Json$Decode$float,
-							A4(
-								NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-								'precipType',
-								elm$json$Json$Decode$string,
-								'precipitation',
+							'temperatureHighTime',
+							author$project$Forecast$unixTimeDecoder,
+							A3(
+								NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+								'temperatureHigh',
+								elm$json$Json$Decode$float,
 								A4(
 									NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-									'precipProbability',
-									author$project$Forecast$floatAsPercentDecoder,
-									0,
-									A3(
-										NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-										'precipIntensity',
-										author$project$Forecast$millimetersAsInchesDecoder,
+									'precipType',
+									elm$json$Json$Decode$string,
+									'precipitation',
+									A4(
+										NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+										'precipProbability',
+										author$project$Forecast$floatAsPercentDecoder,
+										0,
 										A3(
 											NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-											'sunsetTime',
-											author$project$Forecast$unixTimeDecoder,
+											'precipIntensity',
+											author$project$Forecast$millimetersAsInchesDecoder,
 											A3(
 												NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-												'sunriseTime',
+												'sunsetTime',
 												author$project$Forecast$unixTimeDecoder,
 												A3(
 													NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-													'icon',
-													author$project$Forecast$weatherIconDecoder,
+													'sunriseTime',
+													author$project$Forecast$unixTimeDecoder,
 													A3(
 														NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-														'summary',
-														elm$json$Json$Decode$string,
+														'icon',
+														author$project$Forecast$weatherIconDecoder,
 														A3(
 															NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-															'time',
-															author$project$Forecast$unixTimeDecoder,
-															elm$json$Json$Decode$succeed(author$project$Forecast$DailyForecastDetail))))))))))))))));
+															'summary',
+															elm$json$Json$Decode$string,
+															A3(
+																NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+																'time',
+																author$project$Forecast$unixTimeDecoder,
+																elm$json$Json$Decode$succeed(author$project$Forecast$DailyForecastDetail)))))))))))))))));
 var elm$json$Json$Decode$list = _Json_decodeList;
 var author$project$Forecast$dailyForecastSummaryDecoder = A3(
 	NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
@@ -6047,7 +6055,9 @@ var author$project$Forecast$HourlyForecastDetail = function (time) {
 							return function (windSpeed) {
 								return function (windGust) {
 									return function (windBearing) {
-										return {icon: icon, precipIntensity: precipIntensity, precipProbability: precipProbability, precipType: precipType, summary: summary, temperature: temperature, time: time, windBearing: windBearing, windGust: windGust, windSpeed: windSpeed};
+										return function (detailSelected) {
+											return {detailSelected: detailSelected, icon: icon, precipIntensity: precipIntensity, precipProbability: precipProbability, precipType: precipType, summary: summary, temperature: temperature, time: time, windBearing: windBearing, windGust: windGust, windSpeed: windSpeed};
+										};
 									};
 								};
 							};
@@ -6058,48 +6068,53 @@ var author$project$Forecast$HourlyForecastDetail = function (time) {
 		};
 	};
 };
-var author$project$Forecast$hourlyForecastDetailDecoder = A3(
-	NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-	'windBearing',
-	author$project$Forecast$bearingDirectionDecoder,
+var author$project$Forecast$hourlyForecastDetailDecoder = A4(
+	NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+	'detailSelected',
+	elm$json$Json$Decode$bool,
+	false,
 	A3(
 		NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-		'windGust',
-		elm$json$Json$Decode$float,
+		'windBearing',
+		author$project$Forecast$bearingDirectionDecoder,
 		A3(
 			NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-			'windSpeed',
+			'windGust',
 			elm$json$Json$Decode$float,
 			A3(
 				NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-				'temperature',
+				'windSpeed',
 				elm$json$Json$Decode$float,
-				A4(
-					NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-					'precipType',
-					elm$json$Json$Decode$string,
-					'precipitation',
-					A3(
-						NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-						'precipProbability',
-						author$project$Forecast$floatAsPercentDecoder,
+				A3(
+					NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+					'temperature',
+					elm$json$Json$Decode$float,
+					A4(
+						NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+						'precipType',
+						elm$json$Json$Decode$string,
+						'precipitation',
 						A3(
 							NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-							'precipIntensity',
-							author$project$Forecast$millimetersAsInchesDecoder,
+							'precipProbability',
+							author$project$Forecast$floatAsPercentDecoder,
 							A3(
 								NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-								'icon',
-								author$project$Forecast$weatherIconDecoder,
+								'precipIntensity',
+								author$project$Forecast$millimetersAsInchesDecoder,
 								A3(
 									NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-									'summary',
-									elm$json$Json$Decode$string,
+									'icon',
+									author$project$Forecast$weatherIconDecoder,
 									A3(
 										NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-										'time',
-										author$project$Forecast$unixTimeDecoder,
-										elm$json$Json$Decode$succeed(author$project$Forecast$HourlyForecastDetail)))))))))));
+										'summary',
+										elm$json$Json$Decode$string,
+										A3(
+											NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+											'time',
+											author$project$Forecast$unixTimeDecoder,
+											elm$json$Json$Decode$succeed(author$project$Forecast$HourlyForecastDetail))))))))))));
 var author$project$Forecast$hourlyForecastSummaryDecoder = A3(
 	NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 	'data',
@@ -7069,7 +7084,7 @@ var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Main$update = F2(
 	function (msg, model) {
 		var addErrorData = function (err) {
-			var _n2 = A2(elm$core$Debug$log, 'error', err);
+			var _n3 = A2(elm$core$Debug$log, 'error', err);
 			return _Utils_update(
 				model,
 				{
@@ -7101,20 +7116,54 @@ var author$project$Main$update = F2(
 						model,
 						{zone: here}),
 					elm$core$Platform$Cmd$none);
-			default:
+			case 'ChangeApplicationView':
 				var v = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{applicationView: v}),
 					elm$core$Platform$Cmd$none);
+			default:
+				var detail = msg.a;
+				var updatedModel = function () {
+					var _n2 = model.forecastSummary;
+					if (_n2.$ === 'Nothing') {
+						return model;
+					} else {
+						var summary = _n2.a;
+						var hfs = summary.hourlyForecastSummary;
+						var hfd = summary.hourlyForecastSummary.data;
+						var updatedHfd = A2(
+							elm$core$List$map,
+							function (x) {
+								return _Utils_eq(x.time, detail.time) ? _Utils_update(
+									x,
+									{detailSelected: true}) : _Utils_update(
+									x,
+									{detailSelected: false});
+							},
+							hfd);
+						var updatedHfs = _Utils_update(
+							hfs,
+							{data: updatedHfd});
+						var updatedSummary = _Utils_update(
+							summary,
+							{hourlyForecastSummary: updatedHfs});
+						return _Utils_update(
+							model,
+							{
+								forecastSummary: elm$core$Maybe$Just(updatedSummary)
+							});
+					}
+				}();
+				return _Utils_Tuple2(updatedModel, elm$core$Platform$Cmd$none);
 		}
 	});
-var author$project$Model$DailyForecasts = {$: 'DailyForecasts'};
-var author$project$Model$HourlyForecasts = {$: 'HourlyForecasts'};
 var author$project$Msg$ChangeApplicationView = function (a) {
 	return {$: 'ChangeApplicationView', a: a};
 };
+var author$project$Model$DailyForecasts = {$: 'DailyForecasts'};
+var author$project$Model$HourlyForecasts = {$: 'HourlyForecasts'};
 var author$project$Forecast$weatherIconAsClass = function (icon) {
 	return 'wi wi-' + function () {
 		switch (icon.$) {
@@ -7804,6 +7853,618 @@ var author$project$View$currentForecastView = F2(
 					A3(iconCard, 'Daily', dailyIcons, author$project$Model$DailyForecasts)
 				]));
 	});
+var author$project$HumanDates$monthToString = function (month) {
+	switch (month.$) {
+		case 'Jan':
+			return 'January';
+		case 'Feb':
+			return 'February';
+		case 'Mar':
+			return 'March';
+		case 'Apr':
+			return 'April';
+		case 'May':
+			return 'May';
+		case 'Jun':
+			return 'Jun';
+		case 'Jul':
+			return 'July';
+		case 'Aug':
+			return 'August';
+		case 'Sep':
+			return 'September';
+		case 'Oct':
+			return 'October';
+		case 'Nov':
+			return 'November';
+		default:
+			return 'December';
+	}
+};
+var author$project$HumanDates$weekdayToString = function (w) {
+	switch (w.$) {
+		case 'Sun':
+			return 'Sunday';
+		case 'Mon':
+			return 'Monday';
+		case 'Tue':
+			return 'Tuesday';
+		case 'Wed':
+			return 'Wednesday';
+		case 'Thu':
+			return 'Thursday';
+		case 'Fri':
+			return 'Friday';
+		default:
+			return 'Saturday';
+	}
+};
+var elm$time$Time$flooredDiv = F2(
+	function (numerator, denominator) {
+		return elm$core$Basics$floor(numerator / denominator);
+	});
+var elm$time$Time$posixToMillis = function (_n0) {
+	var millis = _n0.a;
+	return millis;
+};
+var elm$time$Time$toAdjustedMinutesHelp = F3(
+	function (defaultOffset, posixMinutes, eras) {
+		toAdjustedMinutesHelp:
+		while (true) {
+			if (!eras.b) {
+				return posixMinutes + defaultOffset;
+			} else {
+				var era = eras.a;
+				var olderEras = eras.b;
+				if (_Utils_cmp(era.start, posixMinutes) < 0) {
+					return posixMinutes + era.offset;
+				} else {
+					var $temp$defaultOffset = defaultOffset,
+						$temp$posixMinutes = posixMinutes,
+						$temp$eras = olderEras;
+					defaultOffset = $temp$defaultOffset;
+					posixMinutes = $temp$posixMinutes;
+					eras = $temp$eras;
+					continue toAdjustedMinutesHelp;
+				}
+			}
+		}
+	});
+var elm$time$Time$toAdjustedMinutes = F2(
+	function (_n0, time) {
+		var defaultOffset = _n0.a;
+		var eras = _n0.b;
+		return A3(
+			elm$time$Time$toAdjustedMinutesHelp,
+			defaultOffset,
+			A2(
+				elm$time$Time$flooredDiv,
+				elm$time$Time$posixToMillis(time),
+				60000),
+			eras);
+	});
+var elm$time$Time$toCivil = function (minutes) {
+	var rawDay = A2(elm$time$Time$flooredDiv, minutes, 60 * 24) + 719468;
+	var era = (((rawDay >= 0) ? rawDay : (rawDay - 146096)) / 146097) | 0;
+	var dayOfEra = rawDay - (era * 146097);
+	var yearOfEra = ((((dayOfEra - ((dayOfEra / 1460) | 0)) + ((dayOfEra / 36524) | 0)) - ((dayOfEra / 146096) | 0)) / 365) | 0;
+	var dayOfYear = dayOfEra - (((365 * yearOfEra) + ((yearOfEra / 4) | 0)) - ((yearOfEra / 100) | 0));
+	var mp = (((5 * dayOfYear) + 2) / 153) | 0;
+	var month = mp + ((mp < 10) ? 3 : (-9));
+	var year = yearOfEra + (era * 400);
+	return {
+		day: (dayOfYear - ((((153 * mp) + 2) / 5) | 0)) + 1,
+		month: month,
+		year: year + ((month <= 2) ? 1 : 0)
+	};
+};
+var elm$time$Time$toDay = F2(
+	function (zone, time) {
+		return elm$time$Time$toCivil(
+			A2(elm$time$Time$toAdjustedMinutes, zone, time)).day;
+	});
+var elm$time$Time$Apr = {$: 'Apr'};
+var elm$time$Time$Aug = {$: 'Aug'};
+var elm$time$Time$Dec = {$: 'Dec'};
+var elm$time$Time$Feb = {$: 'Feb'};
+var elm$time$Time$Jan = {$: 'Jan'};
+var elm$time$Time$Jul = {$: 'Jul'};
+var elm$time$Time$Jun = {$: 'Jun'};
+var elm$time$Time$Mar = {$: 'Mar'};
+var elm$time$Time$May = {$: 'May'};
+var elm$time$Time$Nov = {$: 'Nov'};
+var elm$time$Time$Oct = {$: 'Oct'};
+var elm$time$Time$Sep = {$: 'Sep'};
+var elm$time$Time$toMonth = F2(
+	function (zone, time) {
+		var _n0 = elm$time$Time$toCivil(
+			A2(elm$time$Time$toAdjustedMinutes, zone, time)).month;
+		switch (_n0) {
+			case 1:
+				return elm$time$Time$Jan;
+			case 2:
+				return elm$time$Time$Feb;
+			case 3:
+				return elm$time$Time$Mar;
+			case 4:
+				return elm$time$Time$Apr;
+			case 5:
+				return elm$time$Time$May;
+			case 6:
+				return elm$time$Time$Jun;
+			case 7:
+				return elm$time$Time$Jul;
+			case 8:
+				return elm$time$Time$Aug;
+			case 9:
+				return elm$time$Time$Sep;
+			case 10:
+				return elm$time$Time$Oct;
+			case 11:
+				return elm$time$Time$Nov;
+			default:
+				return elm$time$Time$Dec;
+		}
+	});
+var elm$core$Basics$modBy = _Basics_modBy;
+var elm$time$Time$Fri = {$: 'Fri'};
+var elm$time$Time$Mon = {$: 'Mon'};
+var elm$time$Time$Sat = {$: 'Sat'};
+var elm$time$Time$Sun = {$: 'Sun'};
+var elm$time$Time$Thu = {$: 'Thu'};
+var elm$time$Time$Tue = {$: 'Tue'};
+var elm$time$Time$Wed = {$: 'Wed'};
+var elm$time$Time$toWeekday = F2(
+	function (zone, time) {
+		var _n0 = A2(
+			elm$core$Basics$modBy,
+			7,
+			A2(
+				elm$time$Time$flooredDiv,
+				A2(elm$time$Time$toAdjustedMinutes, zone, time),
+				60 * 24));
+		switch (_n0) {
+			case 0:
+				return elm$time$Time$Thu;
+			case 1:
+				return elm$time$Time$Fri;
+			case 2:
+				return elm$time$Time$Sat;
+			case 3:
+				return elm$time$Time$Sun;
+			case 4:
+				return elm$time$Time$Mon;
+			case 5:
+				return elm$time$Time$Tue;
+			default:
+				return elm$time$Time$Wed;
+		}
+	});
+var author$project$HumanDates$prettyDay = F2(
+	function (zone, posix) {
+		var weekday = author$project$HumanDates$weekdayToString(
+			A2(elm$time$Time$toWeekday, zone, posix));
+		var month = author$project$HumanDates$monthToString(
+			A2(elm$time$Time$toMonth, zone, posix));
+		var day = elm$core$String$fromInt(
+			A2(elm$time$Time$toDay, zone, posix));
+		return weekday + (', ' + (month + (' ' + day)));
+	});
+var elm$time$Time$toHour = F2(
+	function (zone, time) {
+		return A2(
+			elm$core$Basics$modBy,
+			24,
+			A2(
+				elm$time$Time$flooredDiv,
+				A2(elm$time$Time$toAdjustedMinutes, zone, time),
+				60));
+	});
+var elm$time$Time$toMinute = F2(
+	function (zone, time) {
+		return A2(
+			elm$core$Basics$modBy,
+			60,
+			A2(elm$time$Time$toAdjustedMinutes, zone, time));
+	});
+var author$project$HumanDates$prettyHourMinute = F2(
+	function (zone, posix) {
+		var minuteRaw = A2(elm$time$Time$toMinute, zone, posix);
+		var minute = function () {
+			var _n3 = minuteRaw < 10;
+			if (_n3) {
+				return '0' + elm$core$String$fromInt(minuteRaw);
+			} else {
+				return elm$core$String$fromInt(minuteRaw);
+			}
+		}();
+		var hourRaw = A2(elm$time$Time$toHour, zone, posix);
+		var _n0 = function () {
+			var _n1 = hourRaw > 12;
+			if (_n1) {
+				return _Utils_Tuple2(hourRaw - 12, 'PM');
+			} else {
+				return _Utils_Tuple2(
+					function () {
+						if (!hourRaw) {
+							return 12;
+						} else {
+							var somethingElse = hourRaw;
+							return somethingElse;
+						}
+					}(),
+					'AM');
+			}
+		}();
+		var hour = _n0.a;
+		var meridiem = _n0.b;
+		return elm$core$String$fromInt(hour) + (':' + (minute + (' ' + meridiem)));
+	});
+var author$project$View$precipitationText = F3(
+	function (precipProbability, precipIntensity, precipType) {
+		var _n0 = precipProbability > 0;
+		if (!_n0) {
+			return 'No precipitation today.';
+		} else {
+			var accumulationClause = function () {
+				var _n1 = A2(myrho$elm_round$Round$round, 3, precipIntensity);
+				if (_n1 === '0.000') {
+					return '';
+				} else {
+					var somethingElse = _n1;
+					return ', with ' + (somethingElse + ' inches of accumulation per hour');
+				}
+			}();
+			return A2(myrho$elm_round$Round$round, 0, precipProbability) + ('% chance of ' + (precipType + (accumulationClause + '.')));
+		}
+	});
+var author$project$Forecast$bearingDirectionToString = function (b) {
+	switch (b.$) {
+		case 'North':
+			return 'North';
+		case 'Northeast':
+			return 'Northeast';
+		case 'East':
+			return 'East';
+		case 'Southeast':
+			return 'Southeast';
+		case 'South':
+			return 'South';
+		case 'Southwest':
+			return 'Southwest';
+		case 'West':
+			return 'West';
+		default:
+			return 'Northwest';
+	}
+};
+var elm$core$String$toLower = _String_toLower;
+var author$project$View$windSpeedText = F3(
+	function (windSpeed, windGust, bearingDirection) {
+		var _n0 = windSpeed > 0;
+		if (!_n0) {
+			return 'No wind today.';
+		} else {
+			var gustsClause = function () {
+				var _n1 = windGust > 0;
+				if (!_n1) {
+					return '';
+				} else {
+					return ', with gusts of up to ' + (A2(myrho$elm_round$Round$round, 0, windGust) + ' MPH');
+				}
+			}();
+			return A2(myrho$elm_round$Round$round, 0, windSpeed) + (' MPH wind, coming from the ' + (elm$core$String$toLower(
+				author$project$Forecast$bearingDirectionToString(bearingDirection)) + (gustsClause + '.')));
+		}
+	});
+var elm$html$Html$li = _VirtualDom_node('li');
+var elm$html$Html$p = _VirtualDom_node('p');
+var elm$html$Html$ul = _VirtualDom_node('ul');
+var author$project$View$dailyForecastDetailDetailView = F2(
+	function (detail, zone) {
+		return A2(
+			elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					elm$html$Html$p,
+					_List_Nil,
+					_List_fromArray(
+						[
+							elm$html$Html$text(detail.summary)
+						])),
+					A2(
+					elm$html$Html$ul,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('list-unstyled')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$li,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text(
+									'High: ' + (A2(myrho$elm_round$Round$round, 0, detail.temperatureHigh) + ('º at ' + A2(author$project$HumanDates$prettyHourMinute, zone, detail.temperatureHighTime))))
+								])),
+							A2(
+							elm$html$Html$li,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text(
+									'Low: ' + (A2(myrho$elm_round$Round$round, 0, detail.temperatureLow) + ('º at ' + A2(author$project$HumanDates$prettyHourMinute, zone, detail.temperatureLowTime))))
+								]))
+						])),
+					A2(
+					elm$html$Html$ul,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('list-unstyled')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$li,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text(
+									A3(author$project$View$precipitationText, detail.precipProbability, detail.precipIntensity, detail.precipType))
+								]))
+						])),
+					A2(
+					elm$html$Html$ul,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('list-unstyled')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$li,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text(
+									A3(author$project$View$windSpeedText, detail.windSpeed, detail.windGust, detail.windBearing))
+								]))
+						]))
+				]));
+	});
+var elm$html$Html$h5 = _VirtualDom_node('h5');
+var author$project$View$dailyForecastDetailSummaryView = F2(
+	function (detail, zone) {
+		return A2(
+			elm$html$Html$div,
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$class('row')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					elm$html$Html$div,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('col')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$h5,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text(
+									A2(author$project$HumanDates$prettyDay, zone, detail.time) + ': '),
+									A2(author$project$View$weatherIconView, detail.icon, 0)
+								])),
+							A2(
+							elm$html$Html$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									A2(author$project$View$dailyForecastDetailDetailView, detail, zone)
+								]))
+						]))
+				]));
+	});
+var author$project$View$dailyForecastView = F2(
+	function (summary, zone) {
+		var topRow = A2(
+			elm$html$Html$div,
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$class('row')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					elm$html$Html$div,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('col')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$h4,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text('Daily')
+								]))
+						]))
+				]));
+		var next8days = A2(elm$core$List$take, 8, summary.data);
+		return A2(
+			elm$html$Html$div,
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$class('container-fluid')
+				]),
+			A2(
+				elm$core$List$cons,
+				topRow,
+				A2(
+					elm$core$List$map,
+					function (x) {
+						return A2(author$project$View$dailyForecastDetailSummaryView, x, zone);
+					},
+					next8days)));
+	});
+var author$project$Msg$SelectHourlyForecastDetail = function (a) {
+	return {$: 'SelectHourlyForecastDetail', a: a};
+};
+var author$project$View$hourlyForecastDetailDetailView = F2(
+	function (detail, zone) {
+		return A2(
+			elm$html$Html$div,
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$class(
+					function () {
+						var _n0 = detail.detailSelected;
+						if (_n0) {
+							return '';
+						} else {
+							return 'd-none';
+						}
+					}())
+				]),
+			_List_fromArray(
+				[
+					A2(
+					elm$html$Html$p,
+					_List_Nil,
+					_List_fromArray(
+						[
+							elm$html$Html$text(detail.summary + '.')
+						])),
+					A2(
+					elm$html$Html$ul,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('list-unstyled')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$li,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text(
+									A3(author$project$View$precipitationText, detail.precipProbability, detail.precipIntensity, detail.precipType))
+								]))
+						])),
+					A2(
+					elm$html$Html$ul,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('list-unstyled')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$li,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text(
+									A3(author$project$View$windSpeedText, detail.windSpeed, detail.windGust, detail.windBearing))
+								]))
+						]))
+				]));
+	});
+var author$project$View$hourlyForecastDetailSummaryView = F2(
+	function (detail, zone) {
+		return A2(
+			elm$html$Html$div,
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$class('row')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					elm$html$Html$div,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('col'),
+							elm$html$Html$Events$onClick(
+							author$project$Msg$SelectHourlyForecastDetail(detail)),
+							A2(elm$html$Html$Attributes$style, 'cursor', 'pointer')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$h5,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text(
+									A2(author$project$HumanDates$prettyHourMinute, zone, detail.time) + (': ' + (A2(myrho$elm_round$Round$round, 0, detail.temperature) + 'º '))),
+									A2(author$project$View$weatherIconView, detail.icon, 0)
+								])),
+							A2(
+							elm$html$Html$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									A2(author$project$View$hourlyForecastDetailDetailView, detail, zone)
+								]))
+						]))
+				]));
+	});
+var author$project$View$hourlyForecastView = F2(
+	function (summary, zone) {
+		var topRow = A2(
+			elm$html$Html$div,
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$class('row')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					elm$html$Html$div,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('col')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$h4,
+							_List_Nil,
+							_List_fromArray(
+								[
+									elm$html$Html$text('Hourly')
+								]))
+						]))
+				]));
+		var next24hours = A2(elm$core$List$take, 24, summary.data);
+		return A2(
+			elm$html$Html$div,
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$class('container-fluid')
+				]),
+			A2(
+				elm$core$List$cons,
+				topRow,
+				A2(
+					elm$core$List$map,
+					function (x) {
+						return A2(author$project$View$hourlyForecastDetailSummaryView, x, zone);
+					},
+					next24hours)));
+	});
 var elm$html$Html$h1 = _VirtualDom_node('h1');
 var author$project$View$view = function (model) {
 	return A2(
@@ -7817,7 +8478,9 @@ var author$project$View$view = function (model) {
 				elm$html$Html$div,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$class('row')
+						elm$html$Html$Attributes$class('row'),
+						elm$html$Html$Events$onClick(
+						author$project$Msg$ChangeApplicationView(author$project$Model$CurrentForecast))
 					]),
 				_List_fromArray(
 					[
@@ -7896,21 +8559,9 @@ var author$project$View$view = function (model) {
 											case 'CurrentForecast':
 												return A2(author$project$View$currentForecastView, summary, model.zone);
 											case 'HourlyForecasts':
-												return A2(
-													elm$html$Html$div,
-													_List_fromArray(
-														[
-															elm$html$Html$Attributes$class('row')
-														]),
-													_List_Nil);
+												return A2(author$project$View$hourlyForecastView, summary.hourlyForecastSummary, model.zone);
 											default:
-												return A2(
-													elm$html$Html$div,
-													_List_fromArray(
-														[
-															elm$html$Html$Attributes$class('row')
-														]),
-													_List_Nil);
+												return A2(author$project$View$dailyForecastView, summary.dailyForecastSummary, model.zone);
 										}
 									}()
 									]))
@@ -8051,7 +8702,6 @@ var elm$browser$Debugger$Overlay$problemToString = function (problem) {
 			return 'virtual DOM values';
 	}
 };
-var elm$html$Html$li = _VirtualDom_node('li');
 var elm$browser$Debugger$Overlay$viewProblemType = function (_n0) {
 	var name = _n0.name;
 	var problems = _n0.problems;
@@ -8067,8 +8717,6 @@ var elm$browser$Debugger$Overlay$viewProblemType = function (_n0) {
 			]));
 };
 var elm$html$Html$a = _VirtualDom_node('a');
-var elm$html$Html$p = _VirtualDom_node('p');
-var elm$html$Html$ul = _VirtualDom_node('ul');
 var elm$html$Html$Attributes$href = function (url) {
 	return A2(
 		elm$html$Html$Attributes$stringProperty,
@@ -11458,4 +12106,4 @@ _Platform_export({'Main':{'init':author$project$Main$main(
 				},
 				A2(elm$json$Json$Decode$field, 'latitude', elm$json$Json$Decode$float));
 		},
-		A2(elm$json$Json$Decode$field, 'longitude', elm$json$Json$Decode$float)))({"versions":{"elm":"0.19.0"},"types":{"message":"Msg.Msg","aliases":{"Forecast.CurrentForecastSummary":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : Forecast.WeatherIcon, precipProbability : Basics.Float, temperature : Basics.Float, windSpeed : Basics.Float }"},"Forecast.DailyForecastDetail":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : Forecast.WeatherIcon, sunriseTime : Time.Posix, sunsetTime : Time.Posix, precipIntensity : Basics.Float, precipProbability : Basics.Float, precipType : String.String, temperatureHigh : Basics.Float, temperatureHighTime : Time.Posix, temperatureLow : Basics.Float, temperatureLowTime : Time.Posix, windSpeed : Basics.Float, windGust : Basics.Float, windBearing : Forecast.BearingDirection }"},"Forecast.DailyForecastSummary":{"args":[],"type":"{ summary : String.String, icon : Forecast.WeatherIcon, data : List.List Forecast.DailyForecastDetail }"},"Forecast.ForecastSummary":{"args":[],"type":"{ latitude : Basics.Float, longitude : Basics.Float, timezone : String.String, currentForecastSummary : Forecast.CurrentForecastSummary, hourlyForecastSummary : Forecast.HourlyForecastSummary, dailyForecastSummary : Forecast.DailyForecastSummary }"},"Forecast.HourlyForecastDetail":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : Forecast.WeatherIcon, precipIntensity : Basics.Float, precipProbability : Basics.Float, precipType : String.String, temperature : Basics.Float, windSpeed : Basics.Float, windGust : Basics.Float, windBearing : Forecast.BearingDirection }"},"Forecast.HourlyForecastSummary":{"args":[],"type":"{ summary : String.String, icon : Forecast.WeatherIcon, data : List.List Forecast.HourlyForecastDetail }"},"Time.Era":{"args":[],"type":"{ start : Basics.Int, offset : Basics.Int }"}},"unions":{"Msg.Msg":{"args":[],"tags":{"GotForecastSummary":["Result.Result Http.Error Forecast.ForecastSummary"],"Here":["Time.Zone"],"ChangeApplicationView":["Model.ApplicationView"]}},"Forecast.BearingDirection":{"args":[],"tags":{"North":[],"Northeast":[],"East":[],"Southeast":[],"South":[],"Southwest":[],"West":[],"Northwest":[]}},"Forecast.WeatherIcon":{"args":[],"tags":{"ClearDay":[],"ClearNight":[],"Rain":[],"Snow":[],"Sleet":[],"Wind":[],"Fog":[],"Cloudy":[],"PartlyCloudyDay":[],"PartlyCloudyNight":[]}},"Model.ApplicationView":{"args":[],"tags":{"CurrentForecast":[],"HourlyForecasts":[],"DailyForecasts":[]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"List.List":{"args":["a"],"tags":{}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Time.Zone":{"args":[],"tags":{"Zone":["Basics.Int","List.List Time.Era"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}}}}})}});}(this));
+		A2(elm$json$Json$Decode$field, 'longitude', elm$json$Json$Decode$float)))({"versions":{"elm":"0.19.0"},"types":{"message":"Msg.Msg","aliases":{"Forecast.CurrentForecastSummary":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : Forecast.WeatherIcon, precipProbability : Basics.Float, temperature : Basics.Float, windSpeed : Basics.Float }"},"Forecast.DailyForecastDetail":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : Forecast.WeatherIcon, sunriseTime : Time.Posix, sunsetTime : Time.Posix, precipIntensity : Basics.Float, precipProbability : Basics.Float, precipType : String.String, temperatureHigh : Basics.Float, temperatureHighTime : Time.Posix, temperatureLow : Basics.Float, temperatureLowTime : Time.Posix, windSpeed : Basics.Float, windGust : Basics.Float, windBearing : Forecast.BearingDirection, detailSelected : Basics.Bool }"},"Forecast.DailyForecastSummary":{"args":[],"type":"{ summary : String.String, icon : Forecast.WeatherIcon, data : List.List Forecast.DailyForecastDetail }"},"Forecast.ForecastSummary":{"args":[],"type":"{ latitude : Basics.Float, longitude : Basics.Float, timezone : String.String, currentForecastSummary : Forecast.CurrentForecastSummary, hourlyForecastSummary : Forecast.HourlyForecastSummary, dailyForecastSummary : Forecast.DailyForecastSummary }"},"Forecast.HourlyForecastDetail":{"args":[],"type":"{ time : Time.Posix, summary : String.String, icon : Forecast.WeatherIcon, precipIntensity : Basics.Float, precipProbability : Basics.Float, precipType : String.String, temperature : Basics.Float, windSpeed : Basics.Float, windGust : Basics.Float, windBearing : Forecast.BearingDirection, detailSelected : Basics.Bool }"},"Forecast.HourlyForecastSummary":{"args":[],"type":"{ summary : String.String, icon : Forecast.WeatherIcon, data : List.List Forecast.HourlyForecastDetail }"},"Time.Era":{"args":[],"type":"{ start : Basics.Int, offset : Basics.Int }"}},"unions":{"Msg.Msg":{"args":[],"tags":{"GotForecastSummary":["Result.Result Http.Error Forecast.ForecastSummary"],"Here":["Time.Zone"],"ChangeApplicationView":["Model.ApplicationView"],"SelectHourlyForecastDetail":["Forecast.HourlyForecastDetail"]}},"Forecast.BearingDirection":{"args":[],"tags":{"North":[],"Northeast":[],"East":[],"Southeast":[],"South":[],"Southwest":[],"West":[],"Northwest":[]}},"Forecast.WeatherIcon":{"args":[],"tags":{"ClearDay":[],"ClearNight":[],"Rain":[],"Snow":[],"Sleet":[],"Wind":[],"Fog":[],"Cloudy":[],"PartlyCloudyDay":[],"PartlyCloudyNight":[]}},"Model.ApplicationView":{"args":[],"tags":{"CurrentForecast":[],"HourlyForecasts":[],"DailyForecasts":[]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"List.List":{"args":["a"],"tags":{}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Time.Zone":{"args":[],"tags":{"Zone":["Basics.Int","List.List Time.Era"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}}}}})}});}(this));
