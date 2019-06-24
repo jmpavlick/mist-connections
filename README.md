@@ -2,6 +2,7 @@
 
 > The UI is incomplete. I was going to work in a joke where tapping on the detail for a weather forecast allowed you to "swipe" on the forecast to show approval or disinterest, like on a dating app - but I didn't get that far. ("Mist Connections", get it? Har har har.)
 
+* I forked this from a "Getting Started with Python and Azure" project - it was basically just a Flask "hello world" that was ready to run on Azure
 * `start.sh` runs the Python API, watches the `elm-ui` folder for changes and builds-on-write, and opens Safari to http://localhost:5000
 * The Javascript function to check for location always fails if the site isn't running on HTTPS. In Chrome, you can load the URL `chrome://flags/#unsafely-treat-insecure-origin-as-secure` and add `http://localhost:5000` as a workaround.
   * The failure mode displays a message that indicates that location is unavailable, and shows you the weather for 1 Infinite Loop, Cupertino, CA instead.
